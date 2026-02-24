@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from app.auth import get_current_user
@@ -26,19 +26,6 @@ def unread_count(db: Session = Depends(get_db), user: User = Depends(get_current
     return {"count": count}
 
 
-@router.patch("/{notification_id}/read", response_model=NotificationRead)
-def mark_read(notification_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
-    notif = db.query(Notification).filter(
-        Notification.id == notification_id,
-        Notification.user_id == user.id,
-    ).first()
-    if notif:
-        notif.is_read = True
-        db.commit()
-        db.refresh(notif)
-    return notif
-
-
 @router.patch("/read-all")
 def mark_all_read(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
     db.query(Notification).filter(
@@ -47,3 +34,17 @@ def mark_all_read(db: Session = Depends(get_db), user: User = Depends(get_curren
     ).update({"is_read": True})
     db.commit()
     return {"ok": True}
+
+
+@router.patch("/{notification_id}/read", response_model=NotificationRead)
+def mark_read(notification_id: int, db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    notif = db.query(Notification).filter(
+        Notification.id == notification_id,
+        Notification.user_id == user.id,
+    ).first()
+    if not notif:
+        raise HTTPException(status_code=404, detail="Értesítés nem található")
+    notif.is_read = True
+    db.commit()
+    db.refresh(notif)
+    return notif

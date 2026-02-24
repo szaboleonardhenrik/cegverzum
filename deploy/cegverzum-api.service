@@ -1,0 +1,21 @@
+[Unit]
+Description=Cégverzum API (Gunicorn + Uvicorn)
+After=network.target postgresql.service redis.service
+Wants=postgresql.service redis.service
+
+[Service]
+Type=notify
+User=cegverzum
+Group=cegverzum
+WorkingDirectory=/opt/cegverzum/backend
+EnvironmentFile=/opt/cegverzum/backend/.env
+ExecStart=/opt/cegverzum/backend/venv/bin/gunicorn app.main:app -c /opt/cegverzum/deploy/gunicorn.conf.py
+ExecReload=/bin/kill -s HUP $MAINPID
+Restart=always
+RestartSec=5
+KillMode=mixed
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

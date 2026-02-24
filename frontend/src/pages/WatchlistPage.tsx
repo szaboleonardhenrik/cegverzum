@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { watchlistApi } from '../api/watchlist'
 import { CompanyCard } from '../components/search/CompanyCard'
-import type { WatchlistItemWithCompany, CompanyListItem } from '../types'
+import type { WatchlistItemWithCompany } from '../types'
 
 /* ── Dummy data ─────────────────────────────────────────────────── */
 

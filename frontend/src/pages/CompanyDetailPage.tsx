@@ -128,32 +128,6 @@ function StatCard({ label, value, sub, color }: {
   )
 }
 
-function RiskGauge({ score }: { score: number }) {
-  const pct = Math.min(100, Math.max(0, score))
-  const color = pct <= 30 ? '#27AE60' : pct <= 60 ? '#F39C12' : '#E74C3C'
-  return (
-    <div className="flex flex-col items-center">
-      <div className="relative w-32 h-16 overflow-hidden">
-        <svg viewBox="0 0 120 60" className="w-full h-full">
-          <path d="M10 55 A50 50 0 0 1 110 55" fill="none" stroke="#e5e7eb" strokeWidth="10" strokeLinecap="round" />
-          <path
-            d="M10 55 A50 50 0 0 1 110 55"
-            fill="none"
-            stroke={color}
-            strokeWidth="10"
-            strokeLinecap="round"
-            strokeDasharray={`${(pct / 100) * 157} 157`}
-          />
-        </svg>
-        <div className="absolute inset-0 flex items-end justify-center pb-0">
-          <span className="text-2xl font-bold" style={{ color }}>{score}</span>
-        </div>
-      </div>
-      <p className="text-xs text-gray-500 mt-1">/ 100</p>
-    </div>
-  )
-}
-
 /* ── main component ──────────────────────────────────────────────── */
 
 export function CompanyDetailPage() {
@@ -355,7 +329,6 @@ export function CompanyDetailPage() {
           <StatCard
             label="Kockázati index"
             value={company.nav_kockazat || '–'}
-            sub="45 / 100 — Átlagos kockázat"
             color="bg-amber-50 text-amber-900"
           />
         </div>
@@ -375,7 +348,7 @@ export function CompanyDetailPage() {
           <FieldRow label="Cégforma" value={company.cegforma} />
           <FieldRow label="Státusz" value={company.statusz} />
           <FieldRow label="Létszám" value={company.letszam_kategoria} />
-          <FieldRow label="KKV besorolás" value="Mikrovállalkozás" />
+          <FieldRow label="Jegyzett tőke" value={company.jegyzett_toke ? `${company.jegyzett_toke} ${company.jegyzett_toke_penznem || 'HUF'}` : null} />
         </Section>
 
         {/* RIGHT: Tevékenység + NAV */}
@@ -402,45 +375,44 @@ export function CompanyDetailPage() {
         </div>
       </div>
 
-      {/* ═══ KOCKÁZATI INDEX + POZITÍV/NEGATÍV INFO ═══ */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <Section
-          title="Kockázati index"
-          color="bg-amber-600"
-          icon={<svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>}
-        >
-          <div className="flex flex-col items-center py-2">
-            <RiskGauge score={45} />
-            <p className="text-sm font-semibold text-gray-700 mt-3">AVG — Átlagos kockázat</p>
-            <p className="text-xs text-gray-500 mt-1 text-center">
-              A kockázati index egy 1-100 skálán jellemzi a cég fizetésképtelenségi valószínűségét.
-              Minél alacsonyabb, annál megbízhatóbb.
-            </p>
-          </div>
-        </Section>
-
+      {/* ═══ POZITÍV/NEGATÍV INFO ═══ */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         <Section
           title="Pozitív információk"
           color="bg-green-600"
           icon={<svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>}
         >
           <div className="space-y-2">
-            <div className="flex items-center gap-2 py-1.5">
-              <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
-              <span className="text-sm text-gray-700">Köztartozásmentes adózó</span>
-            </div>
-            <div className="flex items-center gap-2 py-1.5">
-              <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
-              <span className="text-sm text-gray-700">Megbízható adózó</span>
-            </div>
-            <div className="flex items-center gap-2 py-1.5">
-              <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
-              <span className="text-sm text-gray-700">Változatlan tulajdonosi háttér</span>
-            </div>
-            <div className="flex items-center gap-2 py-1.5">
-              <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
-              <span className="text-sm text-gray-700">Változatlan fő tevékenység</span>
-            </div>
+            {company.statusz === 'aktív' && (
+              <div className="flex items-center gap-2 py-1.5">
+                <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
+                <span className="text-sm text-gray-700">Aktív státuszú cég</span>
+              </div>
+            )}
+            {company.afa_alany === true && (
+              <div className="flex items-center gap-2 py-1.5">
+                <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
+                <span className="text-sm text-gray-700">ÁFA alany</span>
+              </div>
+            )}
+            {company.nav_torlesve === false && (
+              <div className="flex items-center gap-2 py-1.5">
+                <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
+                <span className="text-sm text-gray-700">Érvényes adószám (NAV)</span>
+              </div>
+            )}
+            {!hasNegative && (
+              <div className="flex items-center gap-2 py-1.5">
+                <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
+                <span className="text-sm text-gray-700">Nincs negatív esemény</span>
+              </div>
+            )}
+            {latest && (latest.adozott_eredmeny ?? 0) > 0 && (
+              <div className="flex items-center gap-2 py-1.5">
+                <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
+                <span className="text-sm text-gray-700">Pozitív adózott eredmény ({latest.ev})</span>
+              </div>
+            )}
           </div>
         </Section>
 
@@ -449,15 +421,43 @@ export function CompanyDetailPage() {
           color="bg-red-600"
           icon={<svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4.5c-.77-.833-2.694-.833-3.464 0L3.34 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>}
         >
-          <div className="flex items-center justify-center py-6">
-            <div className="text-center">
-              <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-2">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
-              </div>
-              <p className="text-sm font-medium text-gray-700">Nincs negatív információ</p>
-              <p className="text-xs text-gray-500 mt-0.5">Az elmúlt 2 évben sem</p>
+          {hasNegative || company.nav_torlesve === true || company.statusz === 'megszűnt' ? (
+            <div className="space-y-2">
+              {company.nav_torlesve === true && (
+                <div className="flex items-center gap-2 py-1.5">
+                  <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" />
+                  <span className="text-sm text-gray-700">Adószám törölve (NAV)</span>
+                </div>
+              )}
+              {company.statusz === 'megszűnt' && (
+                <div className="flex items-center gap-2 py-1.5">
+                  <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" />
+                  <span className="text-sm text-gray-700">Megszűnt cég</span>
+                </div>
+              )}
+              {negativeEvents.map(e => (
+                <div key={e.key} className="flex items-center gap-2 py-1.5">
+                  <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" />
+                  <span className="text-sm text-gray-700">{e.label}</span>
+                </div>
+              ))}
+              {latest && (latest.adozott_eredmeny ?? 0) < 0 && (
+                <div className="flex items-center gap-2 py-1.5">
+                  <span className="w-2 h-2 rounded-full bg-red-500 shrink-0" />
+                  <span className="text-sm text-gray-700">Negatív adózott eredmény ({latest.ev})</span>
+                </div>
+              )}
             </div>
-          </div>
+          ) : (
+            <div className="flex items-center justify-center py-6">
+              <div className="text-center">
+                <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-2">
+                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>
+                </div>
+                <p className="text-sm font-medium text-gray-700">Nincs negatív információ</p>
+              </div>
+            </div>
+          )}
         </Section>
       </div>
 
@@ -734,7 +734,7 @@ export function CompanyDetailPage() {
 
       {/* ═══ FOOTER INFO ═══ */}
       <div className="text-center text-xs text-gray-400 py-4">
-        Kapcsolt vállalkozások száma: 5 — ebből NINCS kiemelten kockázatos
+        Adatok forrása: NAV Online Számla API, Cégbíróság — Utolsó frissítés: {new Date().toLocaleDateString('hu-HU')}
       </div>
     </div>
   )

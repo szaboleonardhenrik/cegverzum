@@ -1,0 +1,19 @@
+[Unit]
+Description=Cégverzum Celery Worker
+After=network.target postgresql.service redis.service
+Wants=postgresql.service redis.service
+
+[Service]
+Type=simple
+User=cegverzum
+Group=cegverzum
+WorkingDirectory=/opt/cegverzum/backend
+EnvironmentFile=/opt/cegverzum/backend/.env
+ExecStart=/opt/cegverzum/backend/venv/bin/celery -A app.worker worker --loglevel=info
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

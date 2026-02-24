@@ -41,11 +41,11 @@ export function CookieBanner() {
 
             <div className="flex-1 min-w-0">
               <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-1">
-                {hu ? 'Cookie (suti) tajekoztato' : 'Cookie Notice'}
+                {hu ? 'Cookie (süti) tájékoztató' : 'Cookie Notice'}
               </h3>
               <p className="text-xs text-gray-600 dark:text-gray-400 leading-relaxed mb-4">
                 {hu
-                  ? 'Weboldalunk sutiket (cookie-kat) hasznal a legjobb felhasznaloi elmeny biztositasa erdekeben. A szukseges sutik az oldal mukodesehez elengedhetetlenek. A statisztikai es marketing sutik segitenek az oldal fejleszteseben es a szemelyre szabott tartalmak megjelenteseben. Az "Elfogadom" gombra kattintva hozzajarul az osszes suti hasznalatahoz.'
+                  ? 'Weboldalunk sütiket (cookie-kat) használ a legjobb felhasználói élmény biztosítása érdekében. A szükséges sütik az oldal működéséhez elengedhetetlenek. A statisztikai és marketing sütik segítenek az oldal fejlesztésében és a személyre szabott tartalmak megjelenítésében. Az "Elfogadom" gombra kattintva hozzájárul az összes süti használatához.'
                   : 'Our website uses cookies to ensure the best user experience. Necessary cookies are essential for the site to function. Statistical and marketing cookies help improve the site and display personalized content. By clicking "Accept all" you consent to the use of all cookies.'}
               </p>
 
@@ -60,13 +60,13 @@ export function CookieBanner() {
                   onClick={acceptNecessary}
                   className="bg-gray-100 dark:bg-slate-700 hover:bg-gray-200 dark:hover:bg-slate-600 text-gray-700 dark:text-gray-300 text-sm font-medium px-5 py-2 rounded-lg transition-colors border-none cursor-pointer"
                 >
-                  {hu ? 'Csak a szuksegesek' : 'Necessary only'}
+                  {hu ? 'Csak a szükségesek' : 'Necessary only'}
                 </button>
                 <a
                   href="/adatvedelem"
                   className="text-xs text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 underline"
                 >
-                  {hu ? 'Adatvedelmi tajekoztato' : 'Privacy policy'}
+                  {hu ? 'Adatvédelmi tájékoztató' : 'Privacy policy'}
                 </a>
               </div>
             </div>

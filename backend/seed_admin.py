@@ -7,6 +7,7 @@ from app.models.company import Company
 from app.models.financial import FinancialReport, Officer
 from app.models.module import Module, UserModule
 from app.models.notification import Notification
+from app.models.watchlist import WatchlistItem  # noqa: F401 — ensure table is created
 from app.auth import hash_password
 
 Base.metadata.create_all(bind=engine)

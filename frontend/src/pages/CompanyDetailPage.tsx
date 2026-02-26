@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
+import { SEO } from '../components/SEO'
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Legend, PieChart, Pie, Cell,
@@ -439,6 +440,7 @@ export function CompanyDetailPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <SEO title="Cégadatok" description="Részletes céginformáció." />
       {/* Back link */}
       <Link to="/search" className="text-sm text-teal hover:text-teal-dark mb-4 inline-flex items-center gap-1">
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { PACKAGES, formatPriceNumber, pricePeriod } from '../config/pricing'
+import { SEO } from '../components/SEO'
 
 /* ───────── tiny SVG helper ───────── */
 function Ico({ d, className = 'w-6 h-6' }: { d: string; className?: string }) {
@@ -117,9 +118,10 @@ const t = {
     footerLinks: [
       { label: 'Szolgáltatások', href: '#szolgaltatasok' },
       { label: 'Árak', href: '#arak' },
-      { label: 'Kapcsolat', href: '#kapcsolat' },
+      { label: 'Kapcsolat', href: '/kapcsolat' },
       { label: 'ÁSZF', href: '/aszf' },
       { label: 'Adatvédelem', href: '/adatvedelem' },
+      { label: 'Blog', href: '/blog' },
     ],
     footerContactTitle: 'Kapcsolat',
     copyright: 'Minden jog fenntartva.',
@@ -228,9 +230,10 @@ const t = {
     footerLinks: [
       { label: 'Services', href: '#szolgaltatasok' },
       { label: 'Pricing', href: '#arak' },
-      { label: 'Contact', href: '#kapcsolat' },
+      { label: 'Contact', href: '/kapcsolat' },
       { label: 'Terms of Service', href: '/aszf' },
       { label: 'Privacy Policy', href: '/adatvedelem' },
+      { label: 'Blog', href: '/blog' },
     ],
     footerContactTitle: 'Contact',
     copyright: 'All rights reserved.',
@@ -328,6 +331,7 @@ export function LandingPage() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 text-gray-800 dark:text-gray-200 transition-colors">
+      <SEO description="Naprakész céginformációk, pénzügyi elemzések, kockázati jelentések és marketing adatbázis több mint 500 000 magyar cégről." />
       {/* NAV */}
       <nav
         className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${
@@ -852,7 +856,7 @@ export function LandingPage() {
                 </li>
                 <li className="flex items-center gap-2">
                   <Ico d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" className="w-4 h-4 shrink-0" />
-                  +36 1 234 5678
+                  +3670 5678948
                 </li>
               </ul>
             </div>

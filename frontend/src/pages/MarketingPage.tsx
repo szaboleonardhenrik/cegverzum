@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useSearchParams, useNavigate } from 'react-router-dom'
 import { companiesApi } from '../api/companies'
+import { SEO } from '../components/SEO'
 import type { CompanyListItem, SearchParams } from '../types'
 
 /* ═══════════ types & constants ═══════════ */
@@ -336,6 +337,7 @@ export function MarketingPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
+      <SEO title="Marketing" description="B2B marketing adatbázis." />
 
       {/* Sticky selection bar */}
       {selectedIds.size > 0 && (

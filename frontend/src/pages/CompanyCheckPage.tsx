@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react'
 import { Link } from 'react-router-dom'
+import { SEO } from '../components/SEO'
 import type { NavTaxpayerResponse } from '../types'
 
 interface PublicCompany {
@@ -178,6 +179,7 @@ export function CompanyCheckPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white dark:from-slate-950 dark:to-slate-900 text-gray-800 dark:text-gray-200">
+      <SEO title="Cégellenőrző" description="Ellenőrizd üzleti partnered hátterét ingyen." />
       {/* Nav */}
       <nav className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-b border-gray-200/50 dark:border-slate-800/50 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">

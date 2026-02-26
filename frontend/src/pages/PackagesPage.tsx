@@ -1,5 +1,6 @@
 import { useAuth } from '../context/AuthContext'
 import { PACKAGES, formatPrice } from '../config/pricing'
+import { SEO } from '../components/SEO'
 
 const FEATURE_LABELS: Record<'hu' | 'en', Record<string, string>> = {
   hu: {
@@ -66,6 +67,7 @@ export function PackagesPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
+      <SEO title="Csomagok" description="Cégverzum előfizetési csomagok és árak." />
       <div className="text-center mb-10">
         <h1 className="text-3xl font-bold text-navy dark:text-white">{s.pageTitle}</h1>
         <p className="text-gray-500 mt-2 max-w-xl mx-auto">

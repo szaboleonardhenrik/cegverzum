@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { RadialBarChart, RadialBar, ResponsiveContainer } from 'recharts'
 import { riskAnalysisApi } from '../api/riskAnalysis'
 import { CompanySearchInput } from '../components/common/CompanySearchInput'
+import { SEO } from '../components/SEO'
 import type { CompanyListItem, RiskAnalysis, WatchlistOverview, WatchlistRiskItem } from '../types'
 
 const RISK_COLORS: Record<string, string> = {
@@ -263,6 +264,7 @@ export function RiskAnalysisPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950 animate-fade-in">
+      <SEO title="Kockázatelemzés" description="Üzleti partnerek kockázati elemzése." />
       {/* Header */}
       <div className="bg-gradient-to-r from-navy-dark to-navy text-white">
         <div className="max-w-7xl mx-auto px-4 py-8">

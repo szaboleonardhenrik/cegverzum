@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom'
 import { companiesApi } from '../api/companies'
 import { integrationsApi } from '../api/integrations'
 import { watchlistApi } from '../api/watchlist'
+import { SEO } from '../components/SEO'
 import { CompanyCard } from '../components/search/CompanyCard'
 import type { CompanyListItem, NavTaxpayerResponse, SearchParams } from '../types'
 
@@ -451,6 +452,7 @@ export function SearchPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
+      <SEO title="Keresés" description="Keress magyar cégek között." />
       {/* Search form */}
       <form onSubmit={handleSearch} className="mb-6">
         <div className="flex gap-2">

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { SEO } from '../components/SEO'
 
 /* ───────── i18n ───────── */
 const t = {
@@ -205,6 +206,7 @@ data = response.json()`,
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950">
+      <SEO title="API Kapcsolat" description="API integráció kezelése." />
       {/* Header banner */}
       <div className="bg-gradient-to-r from-navy via-navy-light to-teal-dark">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">

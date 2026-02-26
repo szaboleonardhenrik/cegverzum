@@ -4,7 +4,40 @@ import type { ChatMessage } from '../types'
 
 const STORAGE_KEY = 'cegverzum_chat_open'
 
+const t = {
+  hu: {
+    title: 'Cégverzum AI',
+    openChat: 'Chat megnyitása',
+    clearHistory: 'Előzmények törlése',
+    close: 'Bezárás',
+    sendMessage: 'Üzenet küldése',
+    greeting: 'Szia! Én a Cégverzum AI vagyok.',
+    askAnything: 'Kérdezz bármit magyar cégekről!',
+    exampleQuery: 'Pl. "Mi a helyzet az XY Kft-vel?"',
+    placeholder: 'Kérdezz egy cégről...',
+    rateLimitError: 'Napi üzenetkorlát elérve (3/3). Jelentkezz be a korlátlan használathoz!',
+    error: 'Hiba:',
+    unknownError: 'Ismeretlen hiba történt',
+  },
+  en: {
+    title: 'Cégverzum AI',
+    openChat: 'Open chat',
+    clearHistory: 'Clear history',
+    close: 'Close',
+    sendMessage: 'Send message',
+    greeting: 'Hi! I am Cégverzum AI.',
+    askAnything: 'Ask anything about Hungarian companies!',
+    exampleQuery: 'E.g. "What\'s the status of XY Ltd?"',
+    placeholder: 'Ask about a company...',
+    rateLimitError: 'Daily message limit reached (3/3). Log in for unlimited usage!',
+    error: 'Error:',
+    unknownError: 'Unknown error occurred',
+  },
+}
+
 export function ChatBubble() {
+  const lang = (localStorage.getItem('cegverzum_lang') as 'hu' | 'en') || 'hu'
+  const s = t[lang]
   const [isOpen, setIsOpen] = useState(() => localStorage.getItem(STORAGE_KEY) === 'true')
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [input, setInput] = useState('')
@@ -82,14 +115,14 @@ export function ChatBubble() {
       setMessages(prev => [...prev, assistantMsg])
       setStreamingText('')
     } catch (e) {
-      const errMessage = e instanceof Error ? e.message : 'Ismeretlen hiba történt'
+      const errMessage = e instanceof Error ? e.message : s.unknownError
       const is429 = errMessage.includes('429') || errMessage.includes('Napi üzenetkorlát') || errMessage.includes('limit')
       const errorMsg: ChatMessage = {
         id: Date.now() + 1,
         role: 'assistant',
         content: is429
-          ? 'Napi üzenetkorlát elérve (3/3). Jelentkezz be a korlátlan használathoz!'
-          : `Hiba: ${errMessage}`,
+          ? s.rateLimitError
+          : `${s.error} ${errMessage}`,
         company_id: null,
         created_at: new Date().toISOString(),
       }
@@ -113,8 +146,8 @@ export function ChatBubble() {
       <button
         onClick={() => setIsOpen(true)}
         className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-gold hover:bg-gold-light text-white shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center cursor-pointer border-none"
-        title="Cégverzum AI"
-        aria-label="Open chat"
+        title={s.title}
+        aria-label={s.openChat}
       >
         <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
@@ -132,14 +165,14 @@ export function ChatBubble() {
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714a2.25 2.25 0 00.659 1.591L19 14.5M14.25 3.104c.251.023.501.05.75.082M19 14.5l-2.47 2.47a2.25 2.25 0 01-1.59.659H9.06a2.25 2.25 0 01-1.59-.659L5 14.5m14 0V17a2 2 0 01-2 2H7a2 2 0 01-2-2v-2.5" />
           </svg>
-          <span className="font-semibold text-sm">Cégverzum AI</span>
+          <span className="font-semibold text-sm">{s.title}</span>
         </div>
         <div className="flex items-center gap-1">
           <button
             onClick={handleClear}
             className="p-1.5 hover:bg-white/20 rounded-lg transition-colors cursor-pointer border-none bg-transparent text-white"
-            title="Előzmények törlése"
-            aria-label="Clear chat history"
+            title={s.clearHistory}
+            aria-label={s.clearHistory}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -148,8 +181,8 @@ export function ChatBubble() {
           <button
             onClick={() => setIsOpen(false)}
             className="p-1.5 hover:bg-white/20 rounded-lg transition-colors cursor-pointer border-none bg-transparent text-white"
-            title="Bezárás"
-            aria-label="Close chat"
+            title={s.close}
+            aria-label={s.close}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -162,9 +195,9 @@ export function ChatBubble() {
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.length === 0 && !streamingText && (
           <div className="text-center text-gray-400 dark:text-gray-500 text-sm mt-8">
-            <p className="font-medium mb-1">Szia! Én a Cégverzum AI vagyok.</p>
-            <p>Kérdezz bármit magyar cégekről!</p>
-            <p className="text-xs mt-2 text-gray-300 dark:text-gray-600">Pl. "Mi a helyzet az XY Kft-vel?"</p>
+            <p className="font-medium mb-1">{s.greeting}</p>
+            <p>{s.askAnything}</p>
+            <p className="text-xs mt-2 text-gray-300 dark:text-gray-600">{s.exampleQuery}</p>
           </div>
         )}
 
@@ -217,7 +250,7 @@ export function ChatBubble() {
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Kérdezz egy cégről..."
+            placeholder={s.placeholder}
             rows={1}
             className="flex-1 resize-none rounded-xl border border-gray-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-gray-900 dark:text-gray-100 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold placeholder-gray-400"
             style={{ maxHeight: '80px' }}
@@ -226,7 +259,7 @@ export function ChatBubble() {
             onClick={handleSend}
             disabled={!input.trim() || isLoading}
             className="shrink-0 w-9 h-9 rounded-xl bg-gold hover:bg-gold-light disabled:opacity-40 disabled:cursor-not-allowed text-white flex items-center justify-center transition-colors cursor-pointer border-none"
-            aria-label="Send message"
+            aria-label={s.sendMessage}
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19V5m0 0l-7 7m7-7l7 7" />

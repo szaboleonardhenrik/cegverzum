@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { SEO } from '../components/SEO'
 
 /* ───────── tiny SVG helper ───────── */
 function Ico({ d, className = 'w-6 h-6' }: { d: string; className?: string }) {
@@ -297,6 +298,7 @@ print(company["adoszam"])   # "12345678-2-42"`
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950 text-gray-800 dark:text-gray-200 transition-colors">
+      <SEO title="API" description="Cégverzum API a céginformációk integrálásához." />
       {/* NAV */}
       <nav
         className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${

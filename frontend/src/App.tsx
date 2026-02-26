@@ -5,6 +5,7 @@ import { Header } from './components/layout/Header'
 import { Footer } from './components/layout/Footer'
 import { ProtectedRoute } from './components/auth/ProtectedRoute'
 import { AdminRoute } from './components/auth/AdminRoute'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { CookieBanner } from './components/CookieBanner'
 import { ChatBubble } from './components/ChatBubble'
 import './App.css'
@@ -27,6 +28,12 @@ const RiskAnalysisPage = lazy(() => import('./pages/RiskAnalysisPage').then(m =>
 const DashboardPage = lazy(() => import('./pages/DashboardPage').then(m => ({ default: m.DashboardPage })))
 const PackagesPage = lazy(() => import('./pages/PackagesPage').then(m => ({ default: m.PackagesPage })))
 const NetworkPage = lazy(() => import('./pages/NetworkPage').then(m => ({ default: m.NetworkPage })))
+const TermsPage = lazy(() => import('./pages/TermsPage').then(m => ({ default: m.TermsPage })))
+const PrivacyPage = lazy(() => import('./pages/PrivacyPage').then(m => ({ default: m.PrivacyPage })))
+const ContactPage = lazy(() => import('./pages/ContactPage').then(m => ({ default: m.ContactPage })))
+const BlogPage = lazy(() => import('./pages/BlogPage').then(m => ({ default: m.BlogPage })))
+const BlogPostPage = lazy(() => import('./pages/BlogPostPage').then(m => ({ default: m.BlogPostPage })))
+const NotFoundPage = lazy(() => import('./pages/NotFoundPage').then(m => ({ default: m.NotFoundPage })))
 
 function PageLoader() {
   return (
@@ -39,10 +46,11 @@ function PageLoader() {
 function AppRoutes() {
   const location = useLocation()
   const isLanding = location.pathname === '/' || location.pathname === '/cegellenorzo' || location.pathname === '/api'
+  const isPublicPage = location.pathname === '/aszf' || location.pathname === '/adatvedelem' || location.pathname === '/kapcsolat' || location.pathname.startsWith('/blog')
 
   return (
     <div className="app-layout">
-      {!isLanding && <Header />}
+      {!isLanding && !isPublicPage && <Header />}
       <main className="flex-1">
         <Suspense fallback={<PageLoader />}>
           <Routes>
@@ -53,6 +61,11 @@ function AppRoutes() {
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
             <Route path="/packages" element={<PackagesPage />} />
+            <Route path="/aszf" element={<TermsPage />} />
+            <Route path="/adatvedelem" element={<PrivacyPage />} />
+            <Route path="/kapcsolat" element={<ContactPage />} />
+            <Route path="/blog" element={<BlogPage />} />
+            <Route path="/blog/:slug" element={<BlogPostPage />} />
             <Route path="/search" element={<ProtectedRoute><SearchPage /></ProtectedRoute>} />
             <Route path="/company/:id" element={<ProtectedRoute><CompanyDetailPage /></ProtectedRoute>} />
             <Route path="/admin" element={<AdminRoute><AdminPage /></AdminRoute>} />
@@ -63,10 +76,11 @@ function AppRoutes() {
             <Route path="/risk-analysis" element={<ProtectedRoute><RiskAnalysisPage /></ProtectedRoute>} />
             <Route path="/watchlist" element={<ProtectedRoute><WatchlistPage /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Suspense>
       </main>
-      {!isLanding && <Footer />}
+      {(!isLanding || isPublicPage) && <Footer />}
       <CookieBanner />
       <ChatBubble />
     </div>
@@ -77,7 +91,9 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppRoutes />
+        <ErrorBoundary>
+          <AppRoutes />
+        </ErrorBoundary>
       </AuthProvider>
     </BrowserRouter>
   )

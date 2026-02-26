@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import ForceGraph2D from 'react-force-graph-2d'
 import { companiesApi } from '../api/companies'
+import { SEO } from '../components/SEO'
 import type { CompanyListItem, NetworkData } from '../types'
 
 export function NetworkPage() {
@@ -125,6 +126,7 @@ export function NetworkPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
+      <SEO title="Piactérkép" description="Üzleti kapcsolati háló vizualizáció." />
       <h1 className="text-2xl font-bold text-navy dark:text-white mb-6">{s.pageTitle}</h1>
 
       {/* Search bar */}

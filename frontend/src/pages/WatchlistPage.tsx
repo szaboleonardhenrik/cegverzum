@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Link } from 'react-router-dom'
 import { watchlistApi } from '../api/watchlist'
 import { CompanyCard } from '../components/search/CompanyCard'
+import { SEO } from '../components/SEO'
 import type { WatchlistItemWithCompany } from '../types'
 
 /* ── Notification settings type ──────────────────────────────────── */
@@ -198,6 +199,7 @@ export function WatchlistPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8 px-4">
+      <SEO title="Cégfigyelő" description="Figyeld üzleti partnereid változásait." />
       <div className="max-w-6xl mx-auto">
 
         {/* ═══ PAGE HEADER ═══ */}

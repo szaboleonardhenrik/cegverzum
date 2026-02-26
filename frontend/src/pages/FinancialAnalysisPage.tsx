@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { SEO } from '../components/SEO'
 import {
   LineChart, Line, BarChart, Bar,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -278,6 +279,7 @@ export function FinancialAnalysisPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-slate-950 animate-fade-in">
+      <SEO title="Pénzügyi Elemzés" description="Cégek pénzügyi elemzése." />
       {/* Header */}
       <div className="bg-gradient-to-r from-navy-dark to-navy text-white">
         <div className="max-w-7xl mx-auto px-4 py-8">

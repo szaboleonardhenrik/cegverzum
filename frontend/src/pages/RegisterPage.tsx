@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { SEO } from '../components/SEO'
 
 type StrengthLabels = { weak: string; medium: string; good: string; strong: string }
 
@@ -144,6 +145,7 @@ export function RegisterPage() {
 
   return (
     <div className="min-h-[calc(100vh-4rem)] flex">
+      <SEO title="Regisztráció" description="Hozz létre ingyenes Cégverzum fiókot." />
       {/* Left side — branded gradient */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-teal-dark via-navy to-navy-dark relative overflow-hidden items-center justify-center animate-fade-in">
         <div className="absolute inset-0 opacity-10">

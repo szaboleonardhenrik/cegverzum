@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { SEO } from '../components/SEO'
 
 const t = {
   hu: {
@@ -69,6 +70,7 @@ export function LoginPage() {
 
   return (
     <div className="min-h-[calc(100vh-4rem)] flex">
+      <SEO title="Bejelentkezés" description="Jelentkezz be a Cégverzum fiókodba." />
       {/* Left side — branded gradient */}
       <div className="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-navy via-navy-light to-teal relative overflow-hidden items-center justify-center animate-fade-in">
         <div className="absolute inset-0 opacity-10">

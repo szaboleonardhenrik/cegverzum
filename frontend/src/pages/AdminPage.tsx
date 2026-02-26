@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { adminApi } from '../api/admin'
+import { SEO } from '../components/SEO'
 import type { User, Module, UserModule, AdminStats } from '../types'
 import { PACKAGES, formatPrice, packageLabel } from '../config/pricing'
 
@@ -485,6 +486,7 @@ export function AdminPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
+      <SEO title="Admin" description="Adminisztrációs felület." />
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-navy dark:text-white">{s.adminPanel}</h1>
         <button

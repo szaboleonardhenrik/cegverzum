@@ -24,7 +24,13 @@ frontend/dist/
 .DS_Store
 Thumbs.db
 
+# Database
+*.db
+
 # Testing
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Junk
+nul

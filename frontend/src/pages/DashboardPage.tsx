@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { dashboardApi } from '../api/dashboard'
+import { SEO } from '../components/SEO'
 import type { DashboardStats } from '../types'
 import { packageLabel } from '../config/pricing'
 
@@ -84,6 +85,7 @@ export function DashboardPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
+      <SEO title="Irányítópult" description="Cégverzum irányítópult." />
       {/* Welcome */}
       <div className="mb-8">
         <h1 className="text-2xl lg:text-3xl font-bold text-navy dark:text-white">

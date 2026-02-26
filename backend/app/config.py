@@ -8,6 +8,17 @@ class Settings(BaseSettings):
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 480
 
+    # SMTP email notifications
+    smtp_host: str = ""
+    smtp_port: int = 587
+    smtp_user: str = ""
+    smtp_password: str = ""
+    smtp_from: str = ""
+    smtp_enabled: bool = False
+
+    # Anthropic Claude API
+    anthropic_api_key: str = ""
+
     # NAV Online Számla API v3.0
     nav_api_url: str = "https://api.onlineszamla.nav.gov.hu/invoiceService/v3"
     nav_login: str = ""

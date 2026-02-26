@@ -283,3 +283,89 @@ def get_officers(company_id: int, db: Session = Depends(get_db), _user: User = D
     if not company:
         raise HTTPException(status_code=404, detail="Cég nem található")
     return db.query(Officer).filter(Officer.company_id == company_id).all()
+
+
+@router.get("/{company_id}/network")
+def get_network(company_id: int, db: Session = Depends(get_db), _user: User = Depends(get_current_user)):
+    """Build a 2-level connection graph through shared officers."""
+    company = db.get(Company, company_id)
+    if not company:
+        raise HTTPException(status_code=404, detail="Cég nem található")
+
+    # Level 1: officers of this company
+    officers = db.query(Officer).filter(Officer.company_id == company_id).all()
+
+    nodes_map: dict[int, dict] = {
+        company.id: {"id": company.id, "nev": company.nev, "statusz": company.statusz, "is_center": True}
+    }
+    links_map: dict[tuple[int, int], list[str]] = {}
+
+    for officer in officers:
+        # Find other companies where this officer also appears
+        other_officers = (
+            db.query(Officer)
+            .filter(Officer.nev == officer.nev, Officer.company_id != company_id)
+            .all()
+        )
+        for other_off in other_officers:
+            other_company = db.get(Company, other_off.company_id)
+            if not other_company:
+                continue
+
+            if other_company.id not in nodes_map:
+                nodes_map[other_company.id] = {
+                    "id": other_company.id,
+                    "nev": other_company.nev,
+                    "statusz": other_company.statusz,
+                    "is_center": False,
+                }
+
+            link_key = (min(company_id, other_company.id), max(company_id, other_company.id))
+            if link_key not in links_map:
+                links_map[link_key] = []
+            if officer.nev not in links_map[link_key]:
+                links_map[link_key].append(officer.nev)
+
+            # Level 2: officers of connected companies → find their other companies
+            level2_officers = (
+                db.query(Officer)
+                .filter(Officer.company_id == other_company.id)
+                .all()
+            )
+            for l2_off in level2_officers:
+                l2_others = (
+                    db.query(Officer)
+                    .filter(
+                        Officer.nev == l2_off.nev,
+                        Officer.company_id != other_company.id,
+                        Officer.company_id != company_id,
+                    )
+                    .all()
+                )
+                for l2_other in l2_others:
+                    l2_company = db.get(Company, l2_other.company_id)
+                    if not l2_company:
+                        continue
+                    if l2_company.id not in nodes_map:
+                        nodes_map[l2_company.id] = {
+                            "id": l2_company.id,
+                            "nev": l2_company.nev,
+                            "statusz": l2_company.statusz,
+                            "is_center": False,
+                        }
+                    l2_key = (
+                        min(other_company.id, l2_company.id),
+                        max(other_company.id, l2_company.id),
+                    )
+                    if l2_key not in links_map:
+                        links_map[l2_key] = []
+                    if l2_off.nev not in links_map[l2_key]:
+                        links_map[l2_key].append(l2_off.nev)
+
+    nodes = list(nodes_map.values())
+    links = [
+        {"source": src, "target": tgt, "officers": names}
+        for (src, tgt), names in links_map.items()
+    ]
+
+    return {"nodes": nodes, "links": links}

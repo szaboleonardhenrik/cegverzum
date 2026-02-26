@@ -1,5 +1,5 @@
 import { api } from './client'
-import type { Company, CompanyListItem, SearchParams, FinancialReport, Officer } from '../types'
+import type { Company, CompanyListItem, SearchParams, FinancialReport, Officer, NetworkData } from '../types'
 
 function buildQuery(params: SearchParams): URLSearchParams {
   const query = new URLSearchParams()
@@ -29,6 +29,7 @@ export const companiesApi = {
   getById: (id: number) => api.get<Company>(`/companies/${id}`),
   getFinancials: (id: number) => api.get<FinancialReport[]>(`/companies/${id}/financials`),
   getOfficers: (id: number) => api.get<Officer[]>(`/companies/${id}/officers`),
+  getNetwork: (id: number) => api.get<NetworkData>(`/companies/${id}/network`),
   exportCsv: async (params: SearchParams): Promise<void> => {
     const query = buildQuery(params)
     query.delete('skip')

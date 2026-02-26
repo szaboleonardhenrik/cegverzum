@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import {
   BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, Legend, PieChart, Pie, Cell,
@@ -132,6 +132,7 @@ function StatCard({ label, value, sub, color }: {
 
 export function CompanyDetailPage() {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
   const [company, setCompany] = useState<Company | null>(null)
   const [financials, setFinancials] = useState<FinancialReport[]>([])
   const [officers, setOfficers] = useState<Officer[]>([])
@@ -272,6 +273,13 @@ export function CompanyDetailPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 0 1 1.04 0l2.125 5.111a.563.563 0 0 0 .475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 0 0-.182.557l1.285 5.385a.562.562 0 0 1-.84.61l-4.725-2.885a.562.562 0 0 0-.586 0L6.982 20.54a.562.562 0 0 1-.84-.61l1.285-5.386a.562.562 0 0 0-.182-.557l-4.204-3.602a.562.562 0 0 1 .321-.988l5.518-.442a.563.563 0 0 0 .475-.345L11.48 3.5Z" />
             </svg>
             {isWatched ? 'Figyelve' : 'Figyelés'}
+          </button>
+          <button
+            onClick={() => navigate(`/market-map?company=${id}`)}
+            className="flex items-center gap-1.5 px-4 py-2 bg-white/10 hover:bg-white/20 rounded-lg text-sm font-medium transition-colors border-none cursor-pointer text-white"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+            Kapcsolati háló
           </button>
           <button
             onClick={() => exportCSV(company, financials, officers)}

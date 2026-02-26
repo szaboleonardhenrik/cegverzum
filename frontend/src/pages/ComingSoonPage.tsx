@@ -32,19 +32,19 @@ const modules: Record<string, ModuleContent> = {
     color: 'text-accent',
     colorBg: 'bg-accent/10',
     colorLight: 'bg-accent/5 border-accent/20',
-    titleHu: 'Piacterkep',
+    titleHu: 'Piactérkép',
     titleEn: 'Market Map',
-    subtitleHu: 'Piaci trendek es adatok vizualizalva',
+    subtitleHu: 'Piaci trendek és adatok vizualizálva',
     subtitleEn: 'Market trends and data visualized',
-    descHu: 'A Piacterkep modul szemelyre szabott piaci adatokat es trendeket biztosit az On iparagarol es celcsoportjarol. Interaktiv terkepek, iparagi osszehasonlitasok, regionalis bontasu statisztikak es vizualis dashboardok segitsegevel atfogo kepet kaphat a magyar piacrol.',
+    descHu: 'A Piactérkép modul személyre szabott piaci adatokat és trendeket biztosít az Ön iparágáról és célcsoportjáról. Interaktív térképek, iparági összehasonlítások, regionális bontású statisztikák és vizuális dashboardok segítségével átfogó képet kaphat a magyar piacról.',
     descEn: 'The Market Map module provides personalized market data and trends for your industry and target audience. With interactive maps, industry comparisons, regional statistics and visual dashboards, you get a comprehensive view of the Hungarian market.',
     featuresHu: [
-      { title: 'Iparagi trendek', desc: 'Reszletes iparagi statisztikak TEAOR kodok alapjan, novekdesi trendek es piaci reszesedes adatok.' },
-      { title: 'Regionalis hoteerkep', desc: 'Vizualis terkep a cegek foldrazi eloszlasarol, surusodesrol es regionalis kulonbsegekrol.' },
-      { title: 'Versenytars-elemezes', desc: 'Osszevetesi lehetoseg az On cegenek piaci poziciojarol a hasonlo cegekhez kepest.' },
-      { title: 'Szemelyre szabott riportok', desc: 'Az On erdeklodesi korere szabott piaci jelensek, PDF es CSV export lehetoseggel.' },
-      { title: 'Alapitasi es megszunesi trendek', desc: 'Havi bontasu adatok uj cegalapitasokrol es megszunesekrol iparag es regio szerint.' },
-      { title: 'Interaktiv diagramok', desc: 'Szureto, nagyithato diagramok es grafikonok, amelyek segitik az adatok megereteset.' },
+      { title: 'Iparági trendek', desc: 'Részletes iparági statisztikák TEÁOR kódok alapján, növekedési trendek és piaci részesedés adatok.' },
+      { title: 'Regionális hőtérkép', desc: 'Vizuális térkép a cégek földrajzi eloszlásáról, sűrűsödésről és regionális különbségekről.' },
+      { title: 'Versenytárs-elemzés', desc: 'Összevetési lehetőség az Ön cégének piaci pozíciójáról a hasonló cégekhez képest.' },
+      { title: 'Személyre szabott riportok', desc: 'Az Ön érdeklődési körére szabott piaci jelenségek, PDF és CSV export lehetőséggel.' },
+      { title: 'Alapítási és megszűnési trendek', desc: 'Havi bontású adatok új cégalapításokról és megszűnésekről iparág és régió szerint.' },
+      { title: 'Interaktív diagramok', desc: 'Szűrhető, nagyítható diagramok és grafikonok, amelyek segítik az adatok megértését.' },
     ],
     featuresEn: [
       { title: 'Industry trends', desc: 'Detailed industry statistics by NACE codes, growth trends and market share data.' },
@@ -60,19 +60,19 @@ const modules: Record<string, ModuleContent> = {
     color: 'text-gold',
     colorBg: 'bg-gold/10',
     colorLight: 'bg-gold/5 border-gold/20',
-    titleHu: 'Penzugyi elemzes',
+    titleHu: 'Pénzügyi elemzés',
     titleEn: 'Financial Analysis',
-    subtitleHu: 'Merleg, eredmenykimutatas, penzugyi mutatok',
+    subtitleHu: 'Mérleg, eredménykimutatás, pénzügyi mutatók',
     subtitleEn: 'Balance sheet, income statement, financial metrics',
-    descHu: 'A Penzugyi elemzes modul teljes koru penzugyi kepet ad barmely magyar cegrol. Merleg, eredmenykimutatas, cash flow elemzes, penzugyi mutatok es trendek — mindezt interaktiv diagramokkal es atlathatoan megjelenitve. Tobb mint 50 automatikusan szamolt penzugyi mutato segiti a donnteshoozatalt.',
+    descHu: 'A Pénzügyi elemzés modul teljes körű pénzügyi képet ad bármely magyar cégről. Mérleg, eredménykimutatás, cash flow elemzés, pénzügyi mutatók és trendek — mindezt interaktív diagramokkal és átláthatóan megjelenítve. Több mint 50 automatikusan számolt pénzügyi mutató segíti a döntéshozatalt.',
     descEn: 'The Financial Analysis module gives you a complete financial picture of any Hungarian company. Balance sheet, income statement, cash flow analysis, financial metrics and trends — all with interactive charts and clear visualizations. Over 50 automatically calculated financial metrics support your decision-making.',
     featuresHu: [
-      { title: 'Merleg es eredmenykimutatas', desc: 'Reszletes penzugyi beszamolok evenkenti bontasban, osszehasonlithato formatumban.' },
-      { title: 'Tobb mint 50 penzugyi mutato', desc: 'Automatikusan szamolt ratiok: likviditasi, jovedelmezosegi, hatekonyasgi es tokestruktura mutatok.' },
-      { title: 'Trendgrafikonok', desc: 'Interaktiv diagramok a ceg penzugyi teljesitmenyenek alakulasarol az evek soran.' },
-      { title: 'Iparagi benchmark', desc: 'A ceg penzugyi mutatoinak osszehasonlitasa az iparagi atlaggal es a versenytarsakkal.' },
-      { title: 'Peenszforgalmi elemzes', desc: 'Cash flow kimutatasa es elemzese, operativ, befektetesi es finanszzirozasi bontasban.' },
-      { title: 'PDF export', desc: 'Reszletes penzugyi jelentes generalasa es letoltese PDF formatumban.' },
+      { title: 'Mérleg és eredménykimutatás', desc: 'Részletes pénzügyi beszámolók évenkénti bontásban, összehasonlítható formátumban.' },
+      { title: 'Több mint 50 pénzügyi mutató', desc: 'Automatikusan számolt ráták: likviditási, jövedelmezőségi, hatékonysági és tőkestruktúra mutatók.' },
+      { title: 'Trendgrafikonok', desc: 'Interaktív diagramok a cég pénzügyi teljesítményének alakulásáról az évek során.' },
+      { title: 'Iparági benchmark', desc: 'A cég pénzügyi mutatóinak összehasonlítása az iparági átlaggal és a versenytársakkal.' },
+      { title: 'Pénzforgalmi elemzés', desc: 'Cash flow kimutatása és elemzése, operatív, befektetési és finanszírozási bontásban.' },
+      { title: 'PDF export', desc: 'Részletes pénzügyi jelentés generálása és letöltése PDF formátumban.' },
     ],
     featuresEn: [
       { title: 'Balance sheet & income statement', desc: 'Detailed financial reports by year in comparable format.' },
@@ -88,19 +88,19 @@ const modules: Record<string, ModuleContent> = {
     color: 'text-red-500',
     colorBg: 'bg-red-500/10',
     colorLight: 'bg-red-500/5 border-red-500/20',
-    titleHu: 'Kockazatelemzes',
+    titleHu: 'Kockázatelemzés',
     titleEn: 'Risk Analysis',
-    subtitleHu: 'Kockazati index, negativ esemenyek figyelese',
+    subtitleHu: 'Kockázati index, negatív események figyelése',
     subtitleEn: 'Risk index, negative event monitoring',
-    descHu: 'A Kockazatelemzes modul segit felterkepezni partnerei es beszallitoi kockazatait. Egysegessitett kockazati index, negativ esemenyek (felszamolas, csodeljras, kenyszertorles) monitorozasa, NAV adoellenorzesi adatok es valoss ideju figyelmeztetsek — hogy idoben megelozze a potenciails problemakat.',
+    descHu: 'A Kockázatelemzés modul segít feltérképezni partnerei és beszállítói kockázatait. Egységesített kockázati index, negatív események (felszámolás, csődeljárás, kényszertörlés) monitorozása, NAV adóellenőrzési adatok és valós idejű figyelmeztetések — hogy időben megelőzze a potenciális problémákat.',
     descEn: 'The Risk Analysis module helps you map the risks of your partners and suppliers. Unified risk index, negative event monitoring (liquidation, bankruptcy, forced deletion), NAV tax audit data and real-time alerts — so you can prevent potential problems in time.',
     featuresHu: [
-      { title: 'Kockazati index', desc: 'Egysegessitett pontszam 1-100 kozott, amely osszefoglalja a ceg kockazati profiljat.' },
-      { title: 'Negativ esemenyek', desc: 'Felszamolas, csodeljras, vegelsszamolas, kenyszertorles statuszok es torteneti adatok.' },
-      { title: 'NAV adatok', desc: 'Adotartozas, adoellenorzesi adatok, NAV feketelistsa es megbizhatosagi jelzesek.' },
-      { title: 'Valtos ideju ertesitesek', desc: 'Automatikus figyelmeztetes, ha egy figyelt ceg kockazati besorolasa valtozik.' },
-      { title: 'Partnerminositess', desc: 'Komplex partnerminositesi rendszer a ceeg penzugyi, jogi es operativ adatai alapjan.' },
-      { title: 'Kockazati riport', desc: 'Reszletes kockazati jelentes generalasa es letoltese PDF formatumban.' },
+      { title: 'Kockázati index', desc: 'Egységesített pontszám 1-100 között, amely összefoglalja a cég kockázati profilját.' },
+      { title: 'Negatív események', desc: 'Felszámolás, csődeljárás, végelszámolás, kényszertörlés státuszok és történeti adatok.' },
+      { title: 'NAV adatok', desc: 'Adótartozás, adóellenőrzési adatok, NAV feketelista és megbízhatósági jelzések.' },
+      { title: 'Valós idejű értesítések', desc: 'Automatikus figyelmeztetés, ha egy figyelt cég kockázati besorolása változik.' },
+      { title: 'Partnerminősítés', desc: 'Komplex partnerminősítési rendszer a cég pénzügyi, jogi és operatív adatai alapján.' },
+      { title: 'Kockázati riport', desc: 'Részletes kockázati jelentés generálása és letöltése PDF formátumban.' },
     ],
     featuresEn: [
       { title: 'Risk index', desc: 'Unified score from 1-100 summarizing the company\'s risk profile.' },
@@ -171,7 +171,7 @@ export function ComingSoonPage() {
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-gold" />
             </span>
             <span className="text-sm font-semibold text-gold">
-              {hu ? 'Fejlesztes alatt — Hamarosan erkezik' : 'Under development — Coming soon'}
+              {hu ? 'Fejlesztés alatt — Hamarosan érkezik' : 'Under development — Coming soon'}
             </span>
           </div>
         </div>
@@ -181,7 +181,7 @@ export function ComingSoonPage() {
         {/* Description */}
         <div className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 p-6 sm:p-8 mb-8">
           <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-3">
-            {hu ? 'A modul leirasa' : 'Module description'}
+            {hu ? 'A modul leírása' : 'Module description'}
           </h2>
           <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{desc}</p>
         </div>
@@ -189,7 +189,7 @@ export function ComingSoonPage() {
         {/* Features grid */}
         <div className="mb-8">
           <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4">
-            {hu ? 'Tervezett funkciok' : 'Planned features'}
+            {hu ? 'Tervezett funkciók' : 'Planned features'}
           </h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {features.map((f, i) => (
@@ -215,11 +215,11 @@ export function ComingSoonPage() {
             </svg>
           </div>
           <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">
-            {hu ? 'Hamarosan elerheto!' : 'Coming soon!'}
+            {hu ? 'Hamarosan elérhető!' : 'Coming soon!'}
           </h3>
           <p className="text-sm text-gray-600 dark:text-gray-400 max-w-lg mx-auto mb-6">
             {hu
-              ? 'Ez a funkcia jelenleg fejlesztes alatt all. Ha ertesulni szeretne a megjeleneserol, kerjuk vegye fel velunk a kapcsolatot vagy kovesse profiloldalunkat.'
+              ? 'Ez a funkció jelenleg fejlesztés alatt áll. Ha értesülni szeretne a megjelenéséről, kérjük vegye fel velünk a kapcsolatot vagy kövesse profiloldalunkat.'
               : 'This feature is currently under development. To be notified of its release, please contact us or follow our profile page.'}
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -227,13 +227,13 @@ export function ComingSoonPage() {
               to="/profile?tab=kapcsolat"
               className="bg-gold hover:bg-gold-light text-white text-sm font-semibold px-6 py-2.5 rounded-lg transition-colors no-underline"
             >
-              {hu ? 'Ertesitsenek' : 'Notify me'}
+              {hu ? 'Értesítsenek' : 'Notify me'}
             </Link>
             <Link
               to="/search"
               className="text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white no-underline border border-gray-300 dark:border-slate-600 px-6 py-2.5 rounded-lg transition-colors"
             >
-              {hu ? 'Vissza a kereseshhez' : 'Back to search'}
+              {hu ? 'Vissza a kereséshez' : 'Back to search'}
             </Link>
           </div>
         </div>

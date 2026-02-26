@@ -9,7 +9,7 @@ from app.models.module import Module, UserModule
 from app.models.user import User
 from app.schemas.module import ModuleRead, UserModuleRead
 from app.auth import hash_password
-from app.schemas.user import UserCreate, UserRead, UserPackageUpdate, UserCreateFull
+from app.schemas.user import UserCreate, UserRead, UserUpdate, UserPackageUpdate, UserCreateFull
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -95,6 +95,33 @@ def activate_partner(user_id: int, db: Session = Depends(get_db), _admin: User =
     if not user or user.is_admin:
         raise HTTPException(status_code=404, detail="Partner nem található")
     user.is_active = True
+    db.commit()
+    db.refresh(user)
+    return _user_to_read(user)
+
+
+# ── Full user update ──────────────────────────────────────────
+
+
+@router.patch("/users/{user_id}", response_model=UserRead)
+def update_user(
+    user_id: int,
+    data: UserUpdate,
+    db: Session = Depends(get_db),
+    admin: User = Depends(require_admin),
+):
+    user = db.get(User, user_id)
+    if not user:
+        raise HTTPException(status_code=404, detail="Felhasználó nem található")
+    updates = data.model_dump(exclude_unset=True)
+    if "email" in updates and updates["email"] != user.email:
+        existing = db.query(User).filter(User.email == updates["email"]).first()
+        if existing:
+            raise HTTPException(status_code=400, detail="Ez az email cím már létezik")
+    if "is_admin" in updates and user.id == admin.id:
+        raise HTTPException(status_code=400, detail="Saját szerepkört nem változtathatja meg")
+    for field, value in updates.items():
+        setattr(user, field, value)
     db.commit()
     db.refresh(user)
     return _user_to_read(user)

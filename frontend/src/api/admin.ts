@@ -1,5 +1,5 @@
 import { api } from './client'
-import type { User, Module, UserModule } from '../types'
+import type { User, Module, UserModule, AdminStats } from '../types'
 
 export const adminApi = {
   // Users (all)
@@ -13,6 +13,10 @@ export const adminApi = {
   deactivatePartner: (userId: number) => api.patch<User>(`/admin/partners/${userId}/deactivate`),
   activatePartner: (userId: number) => api.patch<User>(`/admin/partners/${userId}/activate`),
 
+  // Full user update
+  updateUser: (userId: number, data: Partial<{ email: string; full_name: string; is_admin: boolean; is_active: boolean; package: string; monthly_price: number }>) =>
+    api.patch<User>(`/admin/users/${userId}`, data),
+
   // Package management
   updateUserPackage: (userId: number, pkg: string, monthlyPrice: number) =>
     api.patch<User>(`/admin/users/${userId}/package`, { package: pkg, monthly_price: monthlyPrice }),
@@ -22,6 +26,9 @@ export const adminApi = {
 
   // Delete user
   deleteUser: (userId: number) => api.delete(`/admin/users/${userId}`),
+
+  // Stats
+  getStats: () => api.get<AdminStats>('/admin/stats'),
 
   // Modules
   listModules: () => api.get<Module[]>('/admin/modules'),

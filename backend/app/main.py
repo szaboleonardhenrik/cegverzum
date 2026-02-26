@@ -3,7 +3,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import auth, companies, admin, integrations, notifications, watchlist
+from app.routers import auth, companies, admin, admin_stats, integrations, notifications, watchlist, chat, dashboard
 
 app = FastAPI(title="Cégverzum API", version="0.2.0")
 
@@ -22,6 +22,9 @@ app.include_router(admin.router)
 app.include_router(integrations.router)
 app.include_router(notifications.router)
 app.include_router(watchlist.router)
+app.include_router(chat.router)
+app.include_router(dashboard.router)
+app.include_router(admin_stats.router)
 
 
 @app.get("/")

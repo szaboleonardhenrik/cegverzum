@@ -17,7 +17,11 @@ import { MarketingPage } from './pages/MarketingPage'
 import { ApiLandingPage } from './pages/ApiLandingPage'
 import { ApiPage } from './pages/ApiPage'
 import { ComingSoonPage } from './pages/ComingSoonPage'
+import { DashboardPage } from './pages/DashboardPage'
+import { PackagesPage } from './pages/PackagesPage'
+import { NetworkPage } from './pages/NetworkPage'
 import { CookieBanner } from './components/CookieBanner'
+import { ChatBubble } from './components/ChatBubble'
 import './App.css'
 
 function AppRoutes() {
@@ -34,12 +38,14 @@ function AppRoutes() {
           <Route path="/api" element={<ApiLandingPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/dashboard" element={<ProtectedRoute><DashboardPage /></ProtectedRoute>} />
+          <Route path="/packages" element={<PackagesPage />} />
           <Route path="/search" element={<ProtectedRoute><SearchPage /></ProtectedRoute>} />
           <Route path="/company/:id" element={<ProtectedRoute><CompanyDetailPage /></ProtectedRoute>} />
           <Route path="/admin" element={<AdminRoute><AdminPage /></AdminRoute>} />
           <Route path="/marketing" element={<ProtectedRoute><MarketingPage /></ProtectedRoute>} />
           <Route path="/api-connect" element={<ProtectedRoute><ApiPage /></ProtectedRoute>} />
-          <Route path="/market-map" element={<ProtectedRoute><ComingSoonPage /></ProtectedRoute>} />
+          <Route path="/market-map" element={<ProtectedRoute><NetworkPage /></ProtectedRoute>} />
           <Route path="/financial-analysis" element={<ProtectedRoute><ComingSoonPage /></ProtectedRoute>} />
           <Route path="/risk-analysis" element={<ProtectedRoute><ComingSoonPage /></ProtectedRoute>} />
           <Route path="/watchlist" element={<ProtectedRoute><WatchlistPage /></ProtectedRoute>} />
@@ -48,6 +54,7 @@ function AppRoutes() {
       </main>
       {!isLanding && <Footer />}
       <CookieBanner />
+      <ChatBubble />
     </div>
   )
 }

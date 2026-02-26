@@ -5,6 +5,7 @@ from app.auth import hash_password, verify_password, create_access_token, get_cu
 from app.database import get_db
 from app.models.user import User
 from app.schemas.user import UserLogin, UserRegister, UserRead, PasswordChange, Token
+from app.services.email_service import notify_admins_new_registration
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -34,6 +35,14 @@ def register(data: UserRegister, db: Session = Depends(get_db)):
     if data.full_name:
         user.full_name = data.full_name
     db.commit()
+
+    # Notify admins about new registration (fire-and-forget)
+    admin_emails = [
+        a.email for a in db.query(User).filter(User.is_admin == True, User.is_active == True).all()
+    ]
+    if admin_emails:
+        notify_admins_new_registration(user.email, user.full_name, admin_emails)
+
     return Token(access_token=create_access_token(user))
 
 

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { adminApi } from '../api/admin'
-import type { User, Module, UserModule } from '../types'
+import type { User, Module, UserModule, AdminStats } from '../types'
 
-type Tab = 'felhasznalok' | 'modulok'
+type Tab = 'felhasznalok' | 'modulok' | 'statisztikak'
 
 const PACKAGES = [
   { value: 'free', label: 'Ingyenes', price: 0 },
@@ -75,10 +76,14 @@ export function AdminPage() {
   const [createPrice, setCreatePrice] = useState(0)
   const [creating, setCreating] = useState(false)
 
-  // Package edit modal
+  // Edit user modal
   const [editingUser, setEditingUser] = useState<User | null>(null)
+  const [editName, setEditName] = useState('')
+  const [editEmail, setEditEmail] = useState('')
   const [editPkg, setEditPkg] = useState('')
   const [editPrice, setEditPrice] = useState(0)
+  const [editAdmin, setEditAdmin] = useState(false)
+  const [editActive, setEditActive] = useState(true)
   const [saving, setSaving] = useState(false)
 
   // Delete user modal
@@ -89,6 +94,10 @@ export function AdminPage() {
   const [modules, setModules] = useState<Module[]>([])
   const [userModules, setUserModules] = useState<Record<number, UserModule[]>>({})
   const [modulesLoading, setModulesLoading] = useState(false)
+
+  // Admin stats
+  const [adminStats, setAdminStats] = useState<AdminStats | null>(null)
+  const [statsLoading, setStatsLoading] = useState(false)
 
   // Search/filter
   const [search, setSearch] = useState('')
@@ -132,8 +141,21 @@ export function AdminPage() {
     }
   }
 
+  const loadStats = async () => {
+    setStatsLoading(true)
+    try {
+      const data = await adminApi.getStats()
+      setAdminStats(data)
+    } catch {
+      setError('Nem sikerült betölteni a statisztikákat')
+    } finally {
+      setStatsLoading(false)
+    }
+  }
+
   useEffect(() => { loadUsers() }, [])
   useEffect(() => { if (tab === 'modulok') loadModules() }, [tab])
+  useEffect(() => { if (tab === 'statisztikak') loadStats() }, [tab])
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -193,19 +215,34 @@ export function AdminPage() {
     }
   }
 
-  const openPackageEdit = (user: User) => {
+  const openEditUser = (user: User) => {
     setEditingUser(user)
+    setEditName(user.full_name || '')
+    setEditEmail(user.email)
     setEditPkg(user.package)
     setEditPrice(user.monthly_price)
+    setEditAdmin(user.is_admin)
+    setEditActive(user.is_active)
   }
 
-  const handlePackageSave = async () => {
+  const handleEditSave = async () => {
     if (!editingUser) return
     setSaving(true)
     try {
-      await adminApi.updateUserPackage(editingUser.id, editPkg, editPrice)
+      const data: Record<string, unknown> = {}
+      if (editName !== (editingUser.full_name || '')) data.full_name = editName || null
+      if (editEmail !== editingUser.email) data.email = editEmail
+      if (editPkg !== editingUser.package) data.package = editPkg
+      if (editPrice !== editingUser.monthly_price) data.monthly_price = editPrice
+      if (editAdmin !== editingUser.is_admin) data.is_admin = editAdmin
+      if (editActive !== editingUser.is_active) data.is_active = editActive
+      if (Object.keys(data).length === 0) {
+        setEditingUser(null)
+        return
+      }
+      await adminApi.updateUser(editingUser.id, data)
       setEditingUser(null)
-      setSuccess(`${editingUser.full_name || editingUser.email} csomagja frissítve: ${packageLabel(editPkg)}`)
+      setSuccess(`${editingUser.full_name || editingUser.email} frissítve`)
       await loadUsers()
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Hiba történt')
@@ -363,6 +400,14 @@ export function AdminPage() {
         >
           Modulok
         </button>
+        <button
+          onClick={() => setTab('statisztikak')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium border-none cursor-pointer transition-colors ${
+            tab === 'statisztikak' ? 'bg-white dark:bg-gray-700 text-navy dark:text-white shadow-sm' : 'bg-transparent text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          Statisztikák
+        </button>
       </div>
 
       {error && (
@@ -497,15 +542,9 @@ export function AdminPage() {
                         </span>
                       </td>
                       <td className="px-4 py-3 text-center">
-                        <button
-                          onClick={() => openPackageEdit(user)}
-                          className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium cursor-pointer border-none transition-all hover:ring-2 hover:ring-gold/30 ${packageColor(user.package)}`}
-                        >
+                        <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${packageColor(user.package)}`}>
                           {packageLabel(user.package)}
-                          <svg className="w-3 h-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                          </svg>
-                        </button>
+                        </span>
                       </td>
                       <td className="px-4 py-3 text-right font-mono text-gray-600 dark:text-gray-300">{formatPrice(user.monthly_price)}</td>
                       <td className="px-4 py-3 text-center">
@@ -517,6 +556,13 @@ export function AdminPage() {
                       </td>
                       <td className="px-4 py-3 text-right">
                         <div className="flex items-center justify-end gap-1.5">
+                          <button onClick={() => openEditUser(user)}
+                            className="text-xs font-medium px-2.5 py-1 rounded-lg border-none cursor-pointer transition-colors bg-gold/10 text-gold-dark hover:bg-gold/20"
+                            title="Szerkesztés">
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                            </svg>
+                          </button>
                           {!user.is_admin && (
                             <button onClick={() => handleToggle(user.id, user.is_active)}
                               className={`text-xs font-medium px-2.5 py-1 rounded-lg border-none cursor-pointer transition-colors ${user.is_active ? 'bg-red-50 text-red-700 hover:bg-red-100' : 'bg-green-50 text-green-700 hover:bg-green-100'}`}>
@@ -618,6 +664,107 @@ export function AdminPage() {
         </>
       )}
 
+      {/* STATISZTIKAK TAB */}
+      {tab === 'statisztikak' && (
+        <>
+          {statsLoading ? (
+            <div className="flex justify-center py-12">
+              <div className="animate-spin h-10 w-10 border-4 border-gold border-t-transparent rounded-full" />
+            </div>
+          ) : adminStats ? (
+            <>
+              {/* Stat cards */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
+                  <p className="text-xs text-gray-500 uppercase tracking-wider">Összes felhasználó</p>
+                  <p className="text-2xl font-bold text-navy dark:text-white mt-1">{adminStats.total_users}</p>
+                </div>
+                <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
+                  <p className="text-xs text-gray-500 uppercase tracking-wider">Aktív partnerek</p>
+                  <p className="text-2xl font-bold text-green-600 mt-1">{adminStats.active_users}</p>
+                </div>
+                <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
+                  <p className="text-xs text-gray-500 uppercase tracking-wider">Havi bevétel</p>
+                  <p className="text-2xl font-bold text-gold mt-1">{adminStats.monthly_revenue.toLocaleString('hu-HU')} Ft</p>
+                </div>
+                <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
+                  <p className="text-xs text-gray-500 uppercase tracking-wider">Chat üzenetek</p>
+                  <p className="text-2xl font-bold text-teal mt-1">{adminStats.total_chat_messages.toLocaleString('hu-HU')}</p>
+                </div>
+              </div>
+
+              {/* Additional info row */}
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
+                  <p className="text-xs text-gray-500 uppercase tracking-wider">Cégek az adatbázisban</p>
+                  <p className="text-2xl font-bold text-navy dark:text-white mt-1">{adminStats.total_companies.toLocaleString('hu-HU')}</p>
+                </div>
+                <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
+                  <p className="text-xs text-gray-500 uppercase tracking-wider">Adminok</p>
+                  <p className="text-2xl font-bold text-purple-600 mt-1">{adminStats.admin_count}</p>
+                </div>
+              </div>
+
+              {/* Package chart */}
+              <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm mb-6">
+                <h3 className="text-base font-semibold text-navy dark:text-white mb-4">Felhasználók csomagok szerint</h3>
+                <ResponsiveContainer width="100%" height={280}>
+                  <BarChart data={[
+                    { name: 'Free', count: adminStats.users_by_package.free || 0 },
+                    { name: 'Basic', count: adminStats.users_by_package.basic || 0 },
+                    { name: 'Pro', count: adminStats.users_by_package.pro || 0 },
+                    { name: 'Enterprise', count: adminStats.users_by_package.enterprise || 0 },
+                  ]}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                    <XAxis dataKey="name" tick={{ fontSize: 12 }} />
+                    <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
+                    <Tooltip />
+                    <Bar dataKey="count" name="Felhasználók" fill="#D4A017" radius={[6, 6, 0, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+
+              {/* Recent registrations */}
+              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
+                <div className="px-5 py-3 border-b border-gray-200 dark:border-gray-600">
+                  <h3 className="text-base font-semibold text-navy dark:text-white">Legutóbbi regisztrációk</h3>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-sm">
+                    <thead className="bg-gray-50 dark:bg-gray-700">
+                      <tr>
+                        <th className="text-left px-4 py-3 font-medium text-gray-600 dark:text-gray-300">Név</th>
+                        <th className="text-left px-4 py-3 font-medium text-gray-600 dark:text-gray-300">Email</th>
+                        <th className="text-center px-4 py-3 font-medium text-gray-600 dark:text-gray-300">Csomag</th>
+                        <th className="text-right px-4 py-3 font-medium text-gray-600 dark:text-gray-300">Dátum</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {adminStats.recent_users.map(u => (
+                        <tr key={u.id} className="border-b border-gray-100 dark:border-gray-700 last:border-b-0">
+                          <td className="px-4 py-3 font-medium text-gray-900 dark:text-white">{u.full_name || '–'}</td>
+                          <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{u.email}</td>
+                          <td className="px-4 py-3 text-center">
+                            <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${packageColor(u.package)}`}>
+                              {packageLabel(u.package)}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-right text-gray-500 text-xs">
+                            {u.created_at ? new Date(u.created_at).toLocaleDateString('hu-HU') : '–'}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="text-center text-gray-400 py-12">Nem sikerült betölteni a statisztikákat</div>
+          )}
+        </>
+      )}
+
       {/* CREATE USER MODAL */}
       {showCreate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowCreate(false)}>
@@ -687,49 +834,74 @@ export function AdminPage() {
         </div>
       )}
 
-      {/* PACKAGE EDIT MODAL */}
+      {/* EDIT USER MODAL */}
       {editingUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setEditingUser(null)}>
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 animate-fade-in" onClick={e => e.stopPropagation()}>
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg mx-4 p-6 animate-fade-in" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-5">
-              <h3 className="text-lg font-semibold text-navy dark:text-white">Csomag módosítása</h3>
+              <h3 className="text-lg font-semibold text-navy dark:text-white">Felhasználó szerkesztése</h3>
               <button onClick={() => setEditingUser(null)} className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 bg-transparent border-none cursor-pointer">
                 <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
             </div>
 
-            <div className="mb-4">
-              <p className="text-sm text-gray-500">Felhasználó</p>
-              <p className="font-medium">{editingUser.full_name || editingUser.email}</p>
-              <p className="text-xs text-gray-400">{editingUser.email}</p>
-            </div>
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Teljes név</label>
+                  <input type="text" value={editName} onChange={e => setEditName(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gold bg-white dark:bg-gray-700" placeholder="Példa János" />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+                  <input type="email" value={editEmail} onChange={e => setEditEmail(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gold bg-white dark:bg-gray-700" />
+                </div>
+              </div>
 
-            <div className="space-y-3 mb-5">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">Csomag</label>
-              <div className="grid grid-cols-2 gap-2">
-                {PACKAGES.map(p => (
-                  <button key={p.value} onClick={() => { setEditPkg(p.value); setEditPrice(p.price) }}
-                    className={`p-3 rounded-xl border-2 text-left cursor-pointer transition-all ${editPkg === p.value ? 'border-gold bg-gold/5 ring-2 ring-gold/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 bg-transparent'}`}>
-                    <span className="text-sm font-semibold block">{p.label}</span>
-                    <span className="text-xs text-gray-500">{p.price === 0 ? 'Ingyenes' : `${p.price.toLocaleString('hu-HU')} Ft/hó`}</span>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Csomag</label>
+                <div className="grid grid-cols-2 gap-2">
+                  {PACKAGES.map(p => (
+                    <button key={p.value} onClick={() => { setEditPkg(p.value); setEditPrice(p.price) }}
+                      className={`p-3 rounded-xl border-2 text-left cursor-pointer transition-all ${editPkg === p.value ? 'border-gold bg-gold/5 ring-2 ring-gold/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 bg-transparent'}`}>
+                      <span className="text-sm font-semibold block">{p.label}</span>
+                      <span className="text-xs text-gray-500">{p.price === 0 ? 'Ingyenes' : `${p.price.toLocaleString('hu-HU')} Ft/hó`}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Egyedi havi díj (Ft)</label>
+                <input type="number" value={editPrice} onChange={e => setEditPrice(Number(e.target.value))}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gold bg-white dark:bg-gray-700" />
+              </div>
+
+              <div className="flex items-center gap-6 py-2">
+                <div className="flex items-center gap-3">
+                  <button type="button" onClick={() => setEditActive(!editActive)}
+                    className={`relative w-10 h-5 rounded-full transition-colors border-none cursor-pointer ${editActive ? 'bg-green-500' : 'bg-gray-300'}`}>
+                    <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform ${editActive ? 'translate-x-5' : ''}`} />
                   </button>
-                ))}
+                  <span className="text-sm text-gray-700 dark:text-gray-300">Aktív</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <button type="button" onClick={() => setEditAdmin(!editAdmin)}
+                    className={`relative w-10 h-5 rounded-full transition-colors border-none cursor-pointer ${editAdmin ? 'bg-purple-500' : 'bg-gray-300'}`}>
+                    <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform ${editAdmin ? 'translate-x-5' : ''}`} />
+                  </button>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">Adminisztrátor</span>
+                </div>
               </div>
             </div>
 
-            <div className="mb-5">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Egyedi havi díj (Ft)</label>
-              <input type="number" value={editPrice} onChange={e => setEditPrice(Number(e.target.value))}
-                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gold bg-white dark:bg-gray-700" />
-              <p className="text-xs text-gray-400 mt-1">Egyedi árazás esetén módosítsa kézzel</p>
-            </div>
-
-            <div className="flex gap-2">
+            <div className="flex gap-2 pt-4">
               <button onClick={() => setEditingUser(null)}
                 className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer bg-transparent">
                 Mégse
               </button>
-              <button onClick={handlePackageSave} disabled={saving}
+              <button onClick={handleEditSave} disabled={saving}
                 className="flex-1 px-4 py-2.5 bg-gold hover:bg-gold-light disabled:opacity-50 text-white font-medium rounded-lg text-sm transition-colors cursor-pointer border-none btn-press">
                 {saving ? 'Mentés...' : 'Mentés'}
               </button>

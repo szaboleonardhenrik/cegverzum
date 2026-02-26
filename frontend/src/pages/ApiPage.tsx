@@ -4,78 +4,78 @@ import { Link } from 'react-router-dom'
 /* ───────── i18n ───────── */
 const t = {
   hu: {
-    title: 'API osszekottetes',
-    subtitle: 'Integralja a Cegverzum ceginformacios adatait kozvetlenul sajat rendszerebe.',
-    overviewTitle: 'Attekintes',
-    overviewDesc: 'A Cegverzum API RESTful interfeszt biztosit a magyar ceginformacios adatbazishoz. JSON formatumu valaszok, Bearer token autentikacio, reszletes dokumentacio.',
+    title: 'API összeköttetés',
+    subtitle: 'Integrálja a Cégverzum céginformációs adatait közvetlenül saját rendszerébe.',
+    overviewTitle: 'Áttekintés',
+    overviewDesc: 'A Cégverzum API RESTful interfészt biztosít a magyar céginformációs adatbázishoz. JSON formátumú válaszok, Bearer token autentikáció, részletes dokumentáció.',
     overviewPoints: [
-      'Tobb mint 500 000 ceg adata',
-      'Napi adatfrissites (NAV, Cegbirosag, KSH)',
-      'JSON valaszok, REST vegpontok',
-      'Bearer token autentikacio',
-      'Rate limiting a csomag alapjan',
-      'Webhook ertesitesek',
+      'Több mint 500 000 cég adata',
+      'Napi adatfrissítés (NAV, Cégbíróság, KSH)',
+      'JSON válaszok, REST végpontok',
+      'Bearer token autentikáció',
+      'Rate limiting a csomag alapján',
+      'Webhook értesítések',
     ],
 
-    endpointsTitle: 'Elerheto vegpontok',
+    endpointsTitle: 'Elérhető végpontok',
     endpoints: [
-      { method: 'GET', path: '/v1/companies', desc: 'Cegek keresese es listazasa szuresi feltetelek alapjan' },
-      { method: 'GET', path: '/v1/companies/{id}', desc: 'Egy adott ceg reszletes adatlapja' },
-      { method: 'GET', path: '/v1/companies/{id}/financials', desc: 'Penzugyi adatok: merleg, eredmenykimutatas, mutatok' },
-      { method: 'GET', path: '/v1/companies/{id}/officers', desc: 'Tisztseghviselok es tulajdonosok listaja' },
-      { method: 'GET', path: '/v1/companies/count', desc: 'Talaltatok szama a megadott szurok alapjan' },
-      { method: 'POST', path: '/v1/companies/export/csv', desc: 'CSV export a szurt talalatok alapjan' },
-      { method: 'POST', path: '/v1/webhooks', desc: 'Webhook regisztracio cegvaltozas ertesitesekhez' },
+      { method: 'GET', path: '/v1/companies', desc: 'Cégek keresése és listázása szűrési feltételek alapján' },
+      { method: 'GET', path: '/v1/companies/{id}', desc: 'Egy adott cég részletes adatlapja' },
+      { method: 'GET', path: '/v1/companies/{id}/financials', desc: 'Pénzügyi adatok: mérleg, eredménykimutatás, mutatók' },
+      { method: 'GET', path: '/v1/companies/{id}/officers', desc: 'Tisztségviselők és tulajdonosok listája' },
+      { method: 'GET', path: '/v1/companies/count', desc: 'Találatok száma a megadott szűrők alapján' },
+      { method: 'POST', path: '/v1/companies/export/csv', desc: 'CSV export a szűrt találatok alapján' },
+      { method: 'POST', path: '/v1/webhooks', desc: 'Webhook regisztráció cégváltozás értesítésekhez' },
     ],
 
-    authTitle: 'Autentikacio',
-    authDesc: 'Minden API keres Bearer token autentikciot igenyel. A tokent az Authorization header-ben kell kuldeni.',
+    authTitle: 'Autentikáció',
+    authDesc: 'Minden API kérés Bearer token autentikációt igényel. A tokent az Authorization header-ben kell küldeni.',
 
     pricingTitle: 'API csomagok',
-    pricingSub: 'Valasszon az igenyeinek megfelelo csomagot.',
+    pricingSub: 'Válasszon az igényeinek megfelelő csomagot.',
     plans: [
       {
         name: 'Starter',
         price: '49 900',
-        period: 'Ft / ho',
-        limits: '1 000 lekerdezes/ho | 10 req/sec',
-        features: ['Ceginformaciok', 'Alapveto penzugyi adatok', 'JSON valaszok', 'Email tamogatas'],
+        period: 'Ft / hó',
+        limits: '1 000 lekérdezés/hó | 10 req/sec',
+        features: ['Céginformációk', 'Alapvető pénzügyi adatok', 'JSON válaszok', 'Email támogatás'],
         highlighted: false,
       },
       {
         name: 'Business',
         price: '149 900',
-        period: 'Ft / ho',
-        limits: '10 000 lekerdezes/ho | 50 req/sec',
-        features: ['Teljes penzugyi adatok', 'Tisztseghviselok', 'Kockazati adatok', 'Webhook ertesitesek', 'Prioritasos tamogatas'],
+        period: 'Ft / hó',
+        limits: '10 000 lekérdezés/hó | 50 req/sec',
+        features: ['Teljes pénzügyi adatok', 'Tisztségviselők', 'Kockázati adatok', 'Webhook értesítések', 'Prioritásos támogatás'],
         highlighted: true,
       },
       {
         name: 'Enterprise',
         price: 'Egyedi',
-        period: 'arajanlat',
-        limits: 'Korlatlan | egyedi',
-        features: ['Dedikalt szerver', 'Egyedi endpoint-ok', 'SLA garancia', 'Account manager', 'On-premise opcio'],
+        period: 'árajánlat',
+        limits: 'Korlátlan | egyedi',
+        features: ['Dedikált szerver', 'Egyedi endpoint-ok', 'SLA garancia', 'Account manager', 'On-premise opció'],
         highlighted: false,
       },
     ],
 
-    requestTitle: 'API hozzaferes igenlese',
-    requestSub: 'Toltse ki az alabbi urlapot es munkatarsunk 24 oran belul felveszi Onnel a kapcsolatot.',
-    requestName: 'Teljes nev',
-    requestCompany: 'Cegnev',
-    requestEmail: 'E-mail cim',
-    requestPhone: 'Telefonszam',
-    requestUseCase: 'Tervezett felhasznalasi mod',
-    requestUseCasePlaceholder: 'Pl. CRM integacio, beszallitoi ellenorzes, piackutatas...',
-    requestPlan: 'Erdeklo csomag',
-    requestPlanOptions: ['Starter', 'Business', 'Enterprise', 'Meg nem tudom'],
-    requestButton: 'Igenyles elkuldese',
-    requestSuccess: 'Koszonjuk az igenylesst! Munkatarsunk 24 oran belul felveszi Onnel a kapcsolatot.',
-    requestInfo: 'Kerdesei vannak? Irjon nekunk: api@cegverzum.hu',
+    requestTitle: 'API hozzáférés igénylése',
+    requestSub: 'Töltse ki az alábbi űrlapot és munkatársunk 24 órán belül felveszi Önnel a kapcsolatot.',
+    requestName: 'Teljes név',
+    requestCompany: 'Cégnév',
+    requestEmail: 'E-mail cím',
+    requestPhone: 'Telefonszám',
+    requestUseCase: 'Tervezett felhasználási mód',
+    requestUseCasePlaceholder: 'Pl. CRM integráció, beszállítói ellenőrzés, piackutatás...',
+    requestPlan: 'Érdeklő csomag',
+    requestPlanOptions: ['Starter', 'Business', 'Enterprise', 'Még nem tudom'],
+    requestButton: 'Igénylés elküldése',
+    requestSuccess: 'Köszönjük az igénylést! Munkatársunk 24 órán belül felveszi Önnel a kapcsolatot.',
+    requestInfo: 'Kérdései vannak? Írjon nekünk: api@cegverzum.hu',
 
-    docsLinkText: 'Reszletes API dokumentacio (kulso oldal)',
-    publicPageText: 'Nyilvanos API oldal megtekintese',
+    docsLinkText: 'Részletes API dokumentáció (külső oldal)',
+    publicPageText: 'Nyilvános API oldal megtekintése',
   },
   en: {
     title: 'API Integration',
@@ -282,7 +282,7 @@ data = response.json()`,
             <section className="bg-white dark:bg-slate-800 rounded-xl border border-gray-200 dark:border-slate-700 overflow-hidden">
               <div className="px-6 sm:px-8 pt-6 sm:pt-8 pb-4">
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
-                  {lang === 'hu' ? 'Kod peldak' : 'Code examples'}
+                  {lang === 'hu' ? 'Kód példák' : 'Code examples'}
                 </h2>
               </div>
               <div className="border-t border-gray-200 dark:border-slate-700">
@@ -325,7 +325,7 @@ data = response.json()`,
                   >
                     {plan.highlighted && (
                       <div className="text-[10px] font-bold text-teal uppercase tracking-wider mb-2">
-                        {lang === 'hu' ? 'Ajanlott' : 'Recommended'}
+                        {lang === 'hu' ? 'Ajánlott' : 'Recommended'}
                       </div>
                     )}
                     <h3 className="font-bold text-gray-900 dark:text-white">{plan.name}</h3>

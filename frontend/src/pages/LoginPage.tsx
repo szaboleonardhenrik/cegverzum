@@ -17,7 +17,7 @@ export function LoginPage() {
     setLoading(true)
     try {
       await login(email, password)
-      navigate('/search')
+      navigate('/dashboard')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Hiba történt')
     } finally {

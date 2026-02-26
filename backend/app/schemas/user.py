@@ -1,5 +1,7 @@
 from datetime import datetime
 
+from typing import Optional
+
 from pydantic import BaseModel, EmailStr
 
 
@@ -30,6 +32,15 @@ class UserRead(BaseModel):
     created_at: datetime
 
     model_config = {"from_attributes": True}
+
+
+class UserUpdate(BaseModel):
+    email: Optional[EmailStr] = None
+    full_name: Optional[str] = None
+    is_admin: Optional[bool] = None
+    is_active: Optional[bool] = None
+    package: Optional[str] = None
+    monthly_price: Optional[int] = None
 
 
 class UserPackageUpdate(BaseModel):

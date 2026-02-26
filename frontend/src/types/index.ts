@@ -145,6 +145,63 @@ export interface IntegrationStatus {
   configured: boolean
 }
 
+export interface ChatMessage {
+  id: number
+  role: 'user' | 'assistant'
+  content: string
+  company_id: number | null
+  created_at: string
+}
+
+export interface DashboardStats {
+  total_companies: number
+  watchlist_count: number
+  watchlist_limit: number | null
+  unread_notifications: number
+  package: string
+  recent_watchlist: {
+    id: number
+    company_id: number
+    note: string | null
+    created_at: string
+    company: {
+      id: number
+      nev: string
+      statusz: string
+      szekhely: string | null
+    }
+  }[]
+}
+
+export interface AdminStats {
+  total_users: number
+  active_users: number
+  admin_count: number
+  users_by_package: Record<string, number>
+  total_companies: number
+  total_chat_messages: number
+  monthly_revenue: number
+  recent_users: User[]
+}
+
+export interface NetworkNode {
+  id: number
+  nev: string
+  statusz: string
+  is_center: boolean
+}
+
+export interface NetworkLink {
+  source: number
+  target: number
+  officers: string[]
+}
+
+export interface NetworkData {
+  nodes: NetworkNode[]
+  links: NetworkLink[]
+}
+
 export interface NavTaxNumberDetail {
   taxpayerId: string | null
   vatCode: string | null

@@ -15,13 +15,105 @@ function isAdoszam(q: string): boolean {
   return /^\d{8,}$/.test(clean)
 }
 
-const incorporationLabels: Record<string, string> = {
-  ORGANIZATION: 'Szervezet',
-  SELF_EMPLOYED: 'Egyéni vállalkozó',
-  TAXABLE_PERSON: 'Adóalany',
+const t = {
+  hu: {
+    brandPrefix: 'Cég',
+    brandSuffix: 'verzum',
+    navHome: 'Főoldal',
+    navLogin: 'Bejelentkezés',
+    navRegister: 'Regisztráció',
+    badge: 'NAV adatbázissal összekapcsolva',
+    pageTitle: 'Cégellenőrző',
+    pageSubtitle: 'Adószám vagy cégnév alapján kereshet bármely magyar cégre. Az adószámos keresés a NAV hivatalos adatbázisából ad eredményt.',
+    searchPlaceholder: 'pl. 24107369 vagy Teszt Kft.',
+    searchButton: 'Keresés',
+    searchTip: 'Tipp: Adószámmal keresve a NAV hivatalos adatait kapja, cégnévvel a helyi adatbázisunkból keresünk.',
+    navQuerying: 'NAV adatbázis lekérdezése...',
+    navOfficialHeader: 'NAV — Hivatalos adóhatósági adat',
+    labelTaxNumber: 'Adószám',
+    labelSeat: 'Székhely',
+    labelVatPayer: 'ÁFA alany',
+    vatYes: 'Igen',
+    vatNo: 'Nem',
+    labelType: 'Típus',
+    incorporationOrganization: 'Szervezet',
+    incorporationSelfEmployed: 'Egyéni vállalkozó',
+    incorporationTaxablePerson: 'Adóalany',
+    localDbResults: 'Helyi adatbázis találatok',
+    noResultsTitle: 'Nincs találat',
+    noResultsDesc: 'Próbáljon más keresőszót vagy adjon meg egy 8 számjegyű adószámot a NAV adatbázisból való lekérdezéshez.',
+    blurredTaxNumber: 'Adószám',
+    blurredRegNumber: 'Cégjegyzékszám',
+    blurredRevenue: 'Árbevétel',
+    blurredRisk: 'Kockázat',
+    subscriptionRequired: 'Előfizetés szükséges',
+    subscriptionDesc: 'A teljes céginformáció, pénzügyi adatok és kockázatelemzés megtekintéséhez válasszon előfizetési csomagot.',
+    viewPlans: 'Csomagok megtekintése',
+    featureTaxSearch: 'Adószám keresés',
+    featureTaxSearchDesc: 'NAV adatbázisból',
+    featureNameSearch: 'Cégnév keresés',
+    featureNameSearchDesc: 'Helyi adatbázisból',
+    featureOfficialData: 'Hivatalos adat',
+    featureOfficialDataDesc: 'NAV által hitelesítve',
+    errorNoTaxpayer: 'Az adószámhoz nem tartozik adózó.',
+    errorGeneric: 'Hiba történt',
+    errorNetwork: 'Hálózati hiba — próbálja újra.',
+  },
+  en: {
+    brandPrefix: 'Cég',
+    brandSuffix: 'verzum',
+    navHome: 'Home',
+    navLogin: 'Log in',
+    navRegister: 'Register',
+    badge: 'Connected to NAV database',
+    pageTitle: 'Company Checker',
+    pageSubtitle: 'Search for any Hungarian company by tax number or company name. Tax number searches return results from the official NAV database.',
+    searchPlaceholder: 'e.g. 24107369 or Test Kft.',
+    searchButton: 'Search',
+    searchTip: 'Tip: Searching by tax number returns official NAV data; searching by company name queries our local database.',
+    navQuerying: 'Querying NAV database...',
+    navOfficialHeader: 'NAV — Official tax authority data',
+    labelTaxNumber: 'Tax number',
+    labelSeat: 'Registered seat',
+    labelVatPayer: 'VAT payer',
+    vatYes: 'Yes',
+    vatNo: 'No',
+    labelType: 'Type',
+    incorporationOrganization: 'Organization',
+    incorporationSelfEmployed: 'Self-employed',
+    incorporationTaxablePerson: 'Taxable person',
+    localDbResults: 'Local database results',
+    noResultsTitle: 'No results',
+    noResultsDesc: 'Try a different search term or enter an 8-digit tax number to query the NAV database.',
+    blurredTaxNumber: 'Tax number',
+    blurredRegNumber: 'Registration number',
+    blurredRevenue: 'Revenue',
+    blurredRisk: 'Risk',
+    subscriptionRequired: 'Subscription required',
+    subscriptionDesc: 'To view full company information, financial data and risk analysis, please choose a subscription plan.',
+    viewPlans: 'View plans',
+    featureTaxSearch: 'Tax number search',
+    featureTaxSearchDesc: 'From NAV database',
+    featureNameSearch: 'Company name search',
+    featureNameSearchDesc: 'From local database',
+    featureOfficialData: 'Official data',
+    featureOfficialDataDesc: 'Verified by NAV',
+    errorNoTaxpayer: 'No taxpayer found for this tax number.',
+    errorGeneric: 'An error occurred',
+    errorNetwork: 'Network error — please try again.',
+  },
 }
 
 export function CompanyCheckPage() {
+  const lang = (localStorage.getItem('cegverzum_lang') as 'hu' | 'en') || 'hu'
+  const s = t[lang]
+
+  const incorporationLabels: Record<string, string> = {
+    ORGANIZATION: s.incorporationOrganization,
+    SELF_EMPLOYED: s.incorporationSelfEmployed,
+    TAXABLE_PERSON: s.incorporationTaxablePerson,
+  }
+
   const [searchQuery, setSearchQuery] = useState('')
   const [dbResults, setDbResults] = useState<PublicCompany[]>([])
   const [navResult, setNavResult] = useState<NavTaxpayerResponse | null>(null)
@@ -54,13 +146,13 @@ export function CompanyCheckPage() {
           if (res.ok) {
             const data: NavTaxpayerResponse = await res.json()
             if (data.success) setNavResult(data)
-            else setNavError(data.message || 'Az adószámhoz nem tartozik adózó.')
+            else setNavError(data.message || s.errorNoTaxpayer)
           } else {
-            const err = await res.json().catch(() => ({ detail: 'Hiba történt' }))
-            setNavError(err.detail || `Hiba: ${res.status}`)
+            const err = await res.json().catch(() => ({ detail: s.errorGeneric }))
+            setNavError(err.detail || `${s.errorGeneric}: ${res.status}`)
           }
         })
-        .catch(() => setNavError('Hálózati hiba — próbálja újra.'))
+        .catch(() => setNavError(s.errorNetwork))
         .finally(() => setNavLoading(false))
     }
 
@@ -76,9 +168,9 @@ export function CompanyCheckPage() {
     }
   }
 
-  const statusColor = (s: string) => {
-    if (s === 'aktív') return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
-    if (s === 'megszűnt') return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
+  const statusColor = (st: string) => {
+    if (st === 'aktív') return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400'
+    if (st === 'megszűnt') return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400'
     return 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300'
   }
 
@@ -90,17 +182,17 @@ export function CompanyCheckPage() {
       <nav className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-b border-gray-200/50 dark:border-slate-800/50 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link to="/" className="text-xl font-bold tracking-tight no-underline text-gray-900 dark:text-white">
-            <span className="text-gold">Cég</span>verzum
+            <span className="text-gold">{s.brandPrefix}</span>{s.brandSuffix}
           </Link>
           <div className="flex items-center gap-3">
             <Link to="/" className="text-sm text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white no-underline">
-              Főoldal
+              {s.navHome}
             </Link>
             <Link to="/login" className="text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-white/10 rounded-lg px-4 py-2 no-underline">
-              Bejelentkezés
+              {s.navLogin}
             </Link>
             <Link to="/register" className="text-sm font-medium text-white bg-gold hover:bg-gold-light rounded-lg px-4 py-2 no-underline">
-              Regisztráció
+              {s.navRegister}
             </Link>
           </div>
         </div>
@@ -113,13 +205,13 @@ export function CompanyCheckPage() {
             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
             </svg>
-            NAV adatbázissal összekapcsolva
+            {s.badge}
           </div>
           <h1 className="text-3xl sm:text-5xl font-extrabold text-gray-900 dark:text-white leading-tight">
-            Cégellenőrző
+            {s.pageTitle}
           </h1>
           <p className="mt-4 text-gray-500 dark:text-gray-400 text-lg max-w-xl mx-auto">
-            Adószám vagy cégnév alapján kereshet bármely magyar cégre. Az adószámos keresés a NAV hivatalos adatbázisából ad eredményt.
+            {s.pageSubtitle}
           </p>
 
           <form onSubmit={handleSearch} className="mt-8 flex gap-3 max-w-2xl mx-auto">
@@ -132,7 +224,7 @@ export function CompanyCheckPage() {
                 type="text"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                placeholder="pl. 24107369 vagy Teszt Kft."
+                placeholder={s.searchPlaceholder}
                 className="w-full pl-12 pr-4 py-4 border border-gray-200 dark:border-slate-700 rounded-2xl text-base focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold bg-white dark:bg-slate-800 dark:text-white shadow-sm"
               />
               {searchQuery && isAdoszam(searchQuery) && (
@@ -151,12 +243,12 @@ export function CompanyCheckPage() {
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                 </svg>
-              ) : 'Keresés'}
+              ) : s.searchButton}
             </button>
           </form>
 
           <p className="mt-3 text-xs text-gray-400 dark:text-gray-500">
-            Tipp: Adószámmal keresve a NAV hivatalos adatait kapja, cégnévvel a helyi adatbázisunkból keresünk.
+            {s.searchTip}
           </p>
         </div>
       </section>
@@ -172,7 +264,7 @@ export function CompanyCheckPage() {
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
               </svg>
-              <span className="text-sm text-blue-600 dark:text-blue-400 font-medium">NAV adatbázis lekérdezése...</span>
+              <span className="text-sm text-blue-600 dark:text-blue-400 font-medium">{s.navQuerying}</span>
             </div>
           )}
 
@@ -184,7 +276,7 @@ export function CompanyCheckPage() {
                 <svg className="w-4 h-4 text-white/90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
                 </svg>
-                <span className="text-sm font-semibold text-white">NAV — Hivatalos adóhatósági adat</span>
+                <span className="text-sm font-semibold text-white">{s.navOfficialHeader}</span>
               </div>
 
               <div className="p-6">
@@ -202,7 +294,7 @@ export function CompanyCheckPage() {
                         </svg>
                       </div>
                       <div>
-                        <div className="text-[11px] font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider">Adószám</div>
+                        <div className="text-[11px] font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider">{s.labelTaxNumber}</div>
                         <div className="font-bold text-gray-900 dark:text-white mt-0.5">
                           {navResult.taxNumberDetail.taxpayerId}-{navResult.taxNumberDetail.vatCode}-{navResult.taxNumberDetail.countyCode}
                         </div>
@@ -219,7 +311,7 @@ export function CompanyCheckPage() {
                         </svg>
                       </div>
                       <div>
-                        <div className="text-[11px] font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider">Székhely</div>
+                        <div className="text-[11px] font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider">{s.labelSeat}</div>
                         <div className="font-medium text-gray-900 dark:text-white mt-0.5">{navResult.taxpayerAddressFormatted}</div>
                       </div>
                     </div>
@@ -233,9 +325,9 @@ export function CompanyCheckPage() {
                         </svg>
                       </div>
                       <div>
-                        <div className="text-[11px] font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider">ÁFA alany</div>
+                        <div className="text-[11px] font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider">{s.labelVatPayer}</div>
                         <div className={`font-bold mt-0.5 ${navResult.taxNumberDetail.vatCode === '2' ? 'text-emerald-600 dark:text-emerald-400' : 'text-orange-600 dark:text-orange-400'}`}>
-                          {navResult.taxNumberDetail.vatCode === '2' ? 'Igen' : 'Nem'}
+                          {navResult.taxNumberDetail.vatCode === '2' ? s.vatYes : s.vatNo}
                         </div>
                       </div>
                     </div>
@@ -249,7 +341,7 @@ export function CompanyCheckPage() {
                         </svg>
                       </div>
                       <div>
-                        <div className="text-[11px] font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider">Típus</div>
+                        <div className="text-[11px] font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider">{s.labelType}</div>
                         <div className="font-medium text-gray-900 dark:text-white mt-0.5">
                           {incorporationLabels[navResult.incorporation] || navResult.incorporation}
                         </div>
@@ -292,7 +384,7 @@ export function CompanyCheckPage() {
           {!loading && dbResults.length > 0 && !selectedCompany && (
             <div className="space-y-3 animate-fade-in">
               {navResult && (
-                <p className="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">Helyi adatbázis találatok</p>
+                <p className="text-xs font-medium text-gray-400 dark:text-gray-500 uppercase tracking-wider mb-2">{s.localDbResults}</p>
               )}
               {dbResults.map(c => (
                 <button
@@ -329,9 +421,9 @@ export function CompanyCheckPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                 </svg>
               </div>
-              <p className="text-lg font-semibold text-gray-900 dark:text-white">Nincs találat</p>
+              <p className="text-lg font-semibold text-gray-900 dark:text-white">{s.noResultsTitle}</p>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 max-w-xs mx-auto">
-                Próbáljon más keresőszót vagy adjon meg egy 8 számjegyű adószámot a NAV adatbázisból való lekérdezéshez.
+                {s.noResultsDesc}
               </p>
             </div>
           )}
@@ -359,7 +451,7 @@ export function CompanyCheckPage() {
               <div className="relative p-6">
                 <div className="blur-sm select-none pointer-events-none opacity-60">
                   <div className="grid grid-cols-2 gap-4 mb-4">
-                    {['Adószám', 'Cégjegyzékszám', 'Árbevétel', 'Kockázat'].map(label => (
+                    {[s.blurredTaxNumber, s.blurredRegNumber, s.blurredRevenue, s.blurredRisk].map(label => (
                       <div key={label} className="bg-gray-50 dark:bg-slate-700 rounded-xl p-4">
                         <div className="text-xs text-gray-400 mb-1">{label}</div>
                         <div className="font-semibold text-gray-900 dark:text-white">••••••••</div>
@@ -375,13 +467,13 @@ export function CompanyCheckPage() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
                       </svg>
                     </div>
-                    <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Előfizetés szükséges</h4>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">A teljes céginformáció, pénzügyi adatok és kockázatelemzés megtekintéséhez válasszon előfizetési csomagot.</p>
+                    <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-2">{s.subscriptionRequired}</h4>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-4">{s.subscriptionDesc}</p>
                     <Link
                       to="/#arak"
                       className="inline-block bg-gold hover:bg-gold-light text-white font-semibold rounded-xl px-6 py-2.5 transition-colors no-underline text-sm"
                     >
-                      Csomagok megtekintése
+                      {s.viewPlans}
                     </Link>
                   </div>
                 </div>
@@ -394,9 +486,9 @@ export function CompanyCheckPage() {
             <div className="text-center py-16">
               <div className="grid grid-cols-3 gap-4 max-w-lg mx-auto">
                 {[
-                  { icon: 'M7 20l4-16m2 16l4-16M6 9h14M4 15h14', label: 'Adószám keresés', desc: 'NAV adatbázisból' },
-                  { icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4', label: 'Cégnév keresés', desc: 'Helyi adatbázisból' },
-                  { icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z', label: 'Hivatalos adat', desc: 'NAV által hitelesítve' },
+                  { icon: 'M7 20l4-16m2 16l4-16M6 9h14M4 15h14', label: s.featureTaxSearch, desc: s.featureTaxSearchDesc },
+                  { icon: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4', label: s.featureNameSearch, desc: s.featureNameSearchDesc },
+                  { icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z', label: s.featureOfficialData, desc: s.featureOfficialDataDesc },
                 ].map(item => (
                   <div key={item.label} className="p-4 rounded-2xl bg-white dark:bg-slate-800 border border-gray-100 dark:border-slate-700/50">
                     <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-slate-700 flex items-center justify-center mx-auto mb-3">

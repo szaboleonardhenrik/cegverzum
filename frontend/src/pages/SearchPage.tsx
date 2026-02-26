@@ -414,9 +414,9 @@ export function SearchPage() {
   }
 
   const triStateColor = (v: boolean | undefined): string => {
-    if (v === true) return 'bg-green-100 text-green-800 border-green-300'
-    if (v === false) return 'bg-red-100 text-red-800 border-red-300'
-    return 'bg-gray-100 text-gray-600 border-gray-300'
+    if (v === true) return 'bg-green-100 text-green-800 border-green-300 dark:bg-green-900/30 dark:text-green-400 dark:border-green-800'
+    if (v === false) return 'bg-red-100 text-red-800 border-red-300 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800'
+    return 'bg-gray-100 text-gray-600 border-gray-300 dark:bg-gray-700 dark:text-gray-400 dark:border-gray-600'
   }
 
   /* ───── active filter chips ───── */
@@ -631,6 +631,7 @@ export function SearchPage() {
                 type="button"
                 onClick={() => handleChipRemove(chip)}
                 className="ml-0.5 hover:text-red-500 bg-transparent border-none cursor-pointer p-0 text-current"
+                aria-label={`Remove ${chip.label} filter`}
               >
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -797,6 +798,8 @@ export function SearchPage() {
                   type="button"
                   onClick={() => handleViewChange('grid')}
                   className={`p-1.5 cursor-pointer border-none ${viewMode === 'grid' ? 'bg-gold text-white' : 'bg-white dark:bg-gray-800 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
+                  aria-label="Grid view"
+                  aria-pressed={viewMode === 'grid'}
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
@@ -806,6 +809,8 @@ export function SearchPage() {
                   type="button"
                   onClick={() => handleViewChange('table')}
                   className={`p-1.5 cursor-pointer border-none border-l border-gray-300 dark:border-gray-600 ${viewMode === 'table' ? 'bg-gold text-white' : 'bg-white dark:bg-gray-800 text-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700'}`}
+                  aria-label="Table view"
+                  aria-pressed={viewMode === 'table'}
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
@@ -853,7 +858,7 @@ export function SearchPage() {
                       <td className="px-4 py-3 text-gray-600 dark:text-gray-300 whitespace-nowrap">{company.cegforma || '-'}</td>
                       <td className="px-4 py-3 whitespace-nowrap">
                         <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${
-                          company.statusz === 'aktív' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                          company.statusz === 'aktív' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
                         }`}>
                           {company.statusz}
                         </span>
@@ -874,6 +879,7 @@ export function SearchPage() {
                 onClick={() => setPage(p => Math.max(0, p - 1))}
                 disabled={page === 0}
                 className="px-2.5 py-1.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 disabled:opacity-30 hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 cursor-pointer"
+                aria-label="Previous page"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -904,6 +910,7 @@ export function SearchPage() {
                 onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
                 disabled={page >= totalPages - 1}
                 className="px-2.5 py-1.5 text-sm rounded-lg border border-gray-300 dark:border-gray-600 disabled:opacity-30 hover:bg-gray-50 dark:hover:bg-gray-700 bg-white dark:bg-gray-800 cursor-pointer"
+                aria-label="Next page"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { PACKAGES, formatPriceNumber, pricePeriod } from '../config/pricing'
 
 /* ───────── tiny SVG helper ───────── */
 function Ico({ d, className = 'w-6 h-6' }: { d: string; className?: string }) {
@@ -61,25 +62,25 @@ const t = {
     pricingSub: 'Válassza ki az Önnek megfelelő csomagot — fizessen online, azonnal hozzáférést kap.',
     pricingPlans: [
       {
-        name: 'Basic',
-        price: '9 900',
-        period: 'Ft / hó',
+        name: PACKAGES[1].name,
+        price: formatPriceNumber(PACKAGES[1].price, 'hu'),
+        period: pricePeriod(PACKAGES[1].price, 'hu'),
         features: ['Céginformációk', 'Alapvető pénzügyi adatok', '100 keresés / hó', 'CSV export'],
         cta: 'Megvásárlom',
         highlighted: false,
       },
       {
-        name: 'Pro',
-        price: '29 900',
-        period: 'Ft / hó',
+        name: PACKAGES[2].name,
+        price: formatPriceNumber(PACKAGES[2].price, 'hu'),
+        period: pricePeriod(PACKAGES[2].price, 'hu'),
         features: ['Minden Basic funkció', 'Teljes pénzügyi elemzés', 'Kockázatelemzés', 'Korlátlan keresés', 'Cégfigyelés (10 cég)', 'API hozzáférés'],
         cta: 'Megvásárlom',
         highlighted: true,
       },
       {
-        name: 'Enterprise',
-        price: 'Egyedi',
-        period: 'árajánlat',
+        name: PACKAGES[3].name,
+        price: formatPriceNumber(PACKAGES[3].price, 'hu'),
+        period: pricePeriod(PACKAGES[3].price, 'hu'),
         features: ['Minden Pro funkció', 'Korlátlan cégfigyelés', 'Dedikált API', 'Egyedi integráció', 'Személyes account manager', 'SLA garancia'],
         cta: 'Ajánlatot kérek',
         highlighted: false,
@@ -172,25 +173,25 @@ const t = {
     pricingSub: 'Choose the plan that fits you — pay online, get instant access.',
     pricingPlans: [
       {
-        name: 'Basic',
-        price: '9,900',
-        period: 'HUF / mo',
+        name: PACKAGES[1].name,
+        price: formatPriceNumber(PACKAGES[1].price, 'en'),
+        period: pricePeriod(PACKAGES[1].price, 'en'),
         features: ['Company information', 'Basic financial data', '100 searches / month', 'CSV export'],
         cta: 'Buy now',
         highlighted: false,
       },
       {
-        name: 'Pro',
-        price: '29,900',
-        period: 'HUF / mo',
+        name: PACKAGES[2].name,
+        price: formatPriceNumber(PACKAGES[2].price, 'en'),
+        period: pricePeriod(PACKAGES[2].price, 'en'),
         features: ['All Basic features', 'Full financial analysis', 'Risk assessment', 'Unlimited searches', 'Company monitoring (10)', 'API access'],
         cta: 'Buy now',
         highlighted: true,
       },
       {
-        name: 'Enterprise',
-        price: 'Custom',
-        period: 'pricing',
+        name: PACKAGES[3].name,
+        price: formatPriceNumber(PACKAGES[3].price, 'en'),
+        period: pricePeriod(PACKAGES[3].price, 'en'),
         features: ['All Pro features', 'Unlimited monitoring', 'Dedicated API', 'Custom integration', 'Personal account manager', 'SLA guarantee'],
         cta: 'Request quote',
         highlighted: false,

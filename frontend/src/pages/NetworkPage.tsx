@@ -1,12 +1,41 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
-import { useSearchParams, useNavigate } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 import ForceGraph2D from 'react-force-graph-2d'
 import { companiesApi } from '../api/companies'
 import type { CompanyListItem, NetworkData } from '../types'
 
 export function NetworkPage() {
+  const lang = (localStorage.getItem('cegverzum_lang') as 'hu' | 'en') || 'hu'
+
+  const t = {
+    hu: {
+      pageTitle: 'Kapcsolati háló',
+      searchPlaceholder: 'Keress egy céget a kapcsolati háló megtekintéséhez...',
+      loading: 'Kapcsolati háló betöltése...',
+      emptyTitle: 'Keress egy céget a kapcsolati háló megtekintéséhez',
+      emptySubtitle: 'A gráf a közös tisztségviselőkön keresztüli kapcsolatokat mutatja',
+      legendCenter: 'Központi',
+      legendConnected: 'Kapcsolt',
+      statsCompanies: 'cég',
+      statsConnections: 'kapcsolat',
+      navHint: 'Kattints egy cégre a hálóban a részletek megtekintéséhez, vagy az új központi cégként való betöltéshez.',
+    },
+    en: {
+      pageTitle: 'Network Graph',
+      searchPlaceholder: 'Search for a company to view its network...',
+      loading: 'Loading network graph...',
+      emptyTitle: 'Search for a company to view its network',
+      emptySubtitle: 'The graph shows connections through shared officers',
+      legendCenter: 'Center',
+      legendConnected: 'Connected',
+      statsCompanies: 'companies',
+      statsConnections: 'connections',
+      navHint: 'Click on a company in the graph to view its details or load it as the new center.',
+    },
+  }
+  const s = t[lang]
+
   const [searchParams, setSearchParams] = useSearchParams()
-  const navigate = useNavigate()
   const [query, setQuery] = useState('')
   const [suggestions, setSuggestions] = useState<CompanyListItem[]>([])
   const [showSuggestions, setShowSuggestions] = useState(false)
@@ -14,7 +43,7 @@ export function NetworkPage() {
   const [loading, setLoading] = useState(false)
   const [selectedCompany, setSelectedCompany] = useState<string>('')
   const graphRef = useRef<HTMLDivElement>(null)
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>()
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined)
 
   const loadNetwork = useCallback(async (companyId: number) => {
     setLoading(true)
@@ -64,7 +93,7 @@ export function NetworkPage() {
     setSearchParams({ company: String(company.id) })
   }
 
-  const handleNodeClick = useCallback((node: { id?: number }) => {
+  const handleNodeClick = useCallback((node: { id?: string | number }) => {
     if (!node.id) return
     setSearchParams({ company: String(node.id) })
   }, [setSearchParams])
@@ -96,7 +125,7 @@ export function NetworkPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
-      <h1 className="text-2xl font-bold text-navy dark:text-white mb-6">Kapcsolati háló</h1>
+      <h1 className="text-2xl font-bold text-navy dark:text-white mb-6">{s.pageTitle}</h1>
 
       {/* Search bar */}
       <div className="relative mb-6 max-w-xl">
@@ -110,7 +139,7 @@ export function NetworkPage() {
             onChange={e => handleSearchChange(e.target.value)}
             onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
             onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-            placeholder="Keress egy céget a kapcsolati háló megtekintéséhez..."
+            placeholder={s.searchPlaceholder}
             className="w-full pl-10 pr-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-gold focus:border-transparent bg-white dark:bg-gray-800"
           />
         </div>
@@ -144,7 +173,7 @@ export function NetworkPage() {
           <div className="flex items-center justify-center h-full">
             <div className="text-center">
               <div className="animate-spin h-10 w-10 border-4 border-gold border-t-transparent rounded-full mx-auto mb-3" />
-              <p className="text-sm text-gray-500">Kapcsolati háló betöltése...</p>
+              <p className="text-sm text-gray-500">{s.loading}</p>
             </div>
           </div>
         )}
@@ -157,8 +186,8 @@ export function NetworkPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                 </svg>
               </div>
-              <p className="text-gray-500 text-sm font-medium">Keress egy céget a kapcsolati háló megtekintéséhez</p>
-              <p className="text-gray-400 text-xs mt-1">A gráf a közös tisztségviselőkön keresztüli kapcsolatokat mutatja</p>
+              <p className="text-gray-500 text-sm font-medium">{s.emptyTitle}</p>
+              <p className="text-gray-400 text-xs mt-1">{s.emptySubtitle}</p>
             </div>
           </div>
         )}
@@ -170,13 +199,13 @@ export function NetworkPage() {
               <p className="font-semibold text-gray-700 dark:text-gray-300 mb-1">{selectedCompany}</p>
               <div className="flex items-center gap-3">
                 <span className="flex items-center gap-1">
-                  <span className="w-3 h-3 rounded-full bg-gold inline-block" /> Központi
+                  <span className="w-3 h-3 rounded-full bg-gold inline-block" /> {s.legendCenter}
                 </span>
                 <span className="flex items-center gap-1">
-                  <span className="w-3 h-3 rounded-full bg-teal inline-block" /> Kapcsolt
+                  <span className="w-3 h-3 rounded-full bg-teal inline-block" /> {s.legendConnected}
                 </span>
               </div>
-              <p className="text-gray-400 mt-1">{networkData.nodes.length} cég, {networkData.links.length} kapcsolat</p>
+              <p className="text-gray-400 mt-1">{networkData.nodes.length} {s.statsCompanies}, {networkData.links.length} {s.statsConnections}</p>
             </div>
 
             <ForceGraph2D
@@ -219,7 +248,7 @@ export function NetworkPage() {
       {/* Navigation hint */}
       {networkData && networkData.nodes.length > 0 && (
         <p className="text-xs text-gray-400 text-center mt-3">
-          Kattints egy cégre a hálóban a részletek megtekintéséhez, vagy az új központi cégként való betöltéshez.
+          {s.navHint}
         </p>
       )}
     </div>

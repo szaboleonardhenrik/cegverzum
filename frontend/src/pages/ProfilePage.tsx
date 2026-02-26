@@ -142,7 +142,7 @@ export function ProfilePage() {
                   </div>
                   <div className="flex justify-between py-3 border-b border-gray-100 dark:border-gray-700">
                     <span className="text-sm text-gray-500">Szerepkör</span>
-                    <span className={`text-sm font-medium px-2 py-0.5 rounded-full ${user.is_admin ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}`}>
+                    <span className={`text-sm font-medium px-2 py-0.5 rounded-full ${user.is_admin ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' : 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'}`}>
                       {user.is_admin ? 'Adminisztrátor' : 'Partner'}
                     </span>
                   </div>
@@ -197,7 +197,7 @@ export function ProfilePage() {
                       <p className="font-semibold text-gold-dark">Jelenlegi csomag</p>
                       <p className="text-2xl font-bold text-navy dark:text-white mt-1">{user.is_admin ? 'Admin' : 'Partner'}</p>
                     </div>
-                    <span className="px-3 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">Aktív</span>
+                    <span className="px-3 py-1 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 text-xs font-medium rounded-full">Aktív</span>
                   </div>
                 </div>
                 <p className="text-sm text-gray-500">A modulok aktiválását az adminisztrátor végzi. Kérdés esetén vegye fel a kapcsolatot az ügyfélszolgálattal.</p>

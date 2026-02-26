@@ -2,64 +2,212 @@ import { useState, useEffect } from 'react'
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { adminApi } from '../api/admin'
 import type { User, Module, UserModule, AdminStats } from '../types'
+import { PACKAGES, formatPrice, packageLabel } from '../config/pricing'
 
 type Tab = 'felhasznalok' | 'modulok' | 'statisztikak'
 
-const PACKAGES = [
-  { value: 'free', label: 'Ingyenes', price: 0 },
-  { value: 'basic', label: 'Basic', price: 9900 },
-  { value: 'pro', label: 'Pro', price: 29900 },
-  { value: 'enterprise', label: 'Enterprise', price: 99900 },
-]
-
-function packageLabel(pkg: string): string {
-  return PACKAGES.find(p => p.value === pkg)?.label || pkg
-}
-
 function packageColor(pkg: string): string {
   switch (pkg) {
-    case 'enterprise': return 'bg-purple-100 text-purple-800'
-    case 'pro': return 'bg-gold/10 text-gold-dark'
-    case 'basic': return 'bg-blue-100 text-blue-800'
-    default: return 'bg-gray-100 text-gray-600'
+    case 'enterprise': return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400'
+    case 'pro': return 'bg-gold/10 text-gold-dark dark:bg-gold/20 dark:text-gold'
+    case 'basic': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
+    default: return 'bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-400'
   }
 }
 
-function formatPrice(price: number): string {
-  if (price === 0) return 'Ingyenes'
-  return price.toLocaleString('hu-HU') + ' Ft/hó'
+const t = {
+  hu: {
+    adminPanel: 'Admin panel',
+    newUser: 'Új felhasználó regisztrálása',
+    totalUsers: 'Összes felhasználó',
+    admins: 'Adminok',
+    activePartners: 'Aktív partnerek',
+    monthlyRevenue: 'Havi bevétel',
+    tabUsers: 'Felhasználók',
+    tabModules: 'Modulok',
+    tabStats: 'Statisztikák',
+    searchPlaceholder: 'Keresés név vagy email alapján...',
+    allRoles: 'Minden szerepkör',
+    admin: 'Admin',
+    partner: 'Partner',
+    allPackages: 'Minden csomag',
+    selected: 'kijelölve',
+    csvExport: 'CSV exportálás',
+    thName: 'Név',
+    thEmail: 'Email',
+    thRole: 'Szerepkör',
+    thStatus: 'Státusz',
+    thPackage: 'Csomag',
+    thMonthlyFee: 'Havi díj',
+    thReg: 'Reg.',
+    thActions: 'Műveletek',
+    loading: 'Betöltés...',
+    noResults: 'Nincs találat',
+    notProvided: 'Nincs megadva',
+    active: 'Aktív',
+    inactive: 'Inaktív',
+    editTitle: 'Szerkesztés',
+    ban: 'Tiltás',
+    activate: 'Aktiválás',
+    demoteToPartner: 'Partner-ré visszaállítás',
+    promoteToAdmin: 'Admin-ná kinevezés',
+    deleteUserTitle: 'Felhasználó törlése',
+    usersCount: 'felhasználó',
+    filteredFrom: 'szűrve',
+    from: '-ből',
+    globalModules: 'Globális modulok',
+    globalModulesDesc: 'Globálisan ki/bekapcsolható modulok. Kikapcsolt modul senkinek sem elérhető.',
+    userModuleAccess: 'Felhasználói modul hozzáférés',
+    noPartnersYet: 'Még nincsenek partnerek',
+    chatMessages: 'Chat üzenetek',
+    companiesInDb: 'Cégek az adatbázisban',
+    usersByPackage: 'Felhasználók csomagok szerint',
+    usersChartLabel: 'Felhasználók',
+    recentRegistrations: 'Legutóbbi regisztrációk',
+    thDate: 'Dátum',
+    statsLoadFailed: 'Nem sikerült betölteni a statisztikákat',
+    createUserTitle: 'Új felhasználó regisztrálása',
+    fullName: 'Teljes név',
+    email: 'Email',
+    password: 'Jelszó',
+    passwordHint: '(opcionális — ha üresen hagyja, meghívóként jön létre)',
+    passwordPlaceholder: 'Min. 8 karakter',
+    namePlaceholder: 'Példa János',
+    emailPlaceholder: 'pelda@email.hu',
+    package: 'Csomag',
+    monthlyFeeFt: 'Havi díj (Ft)',
+    administrator: 'Adminisztrátor',
+    cancel: 'Mégse',
+    creating: 'Létrehozás...',
+    createUser: 'Felhasználó létrehozása',
+    editUserTitle: 'Felhasználó szerkesztése',
+    customMonthlyFee: 'Egyedi havi díj (Ft)',
+    saving: 'Mentés...',
+    save: 'Mentés',
+    deleteUserHeading: 'Felhasználó törlése',
+    deleteConfirm: 'Biztosan törölni szeretné',
+    deleteConfirmSuffix: 'felhasználót? Ez a művelet nem vonható vissza.',
+    deleting: 'Törlés...',
+    delete: 'Törlés',
+    errorLoadUsers: 'Nem sikerült betölteni a felhasználókat',
+    errorLoadModules: 'Nem sikerült betölteni a modulokat',
+    errorLoadStats: 'Nem sikerült betölteni a statisztikákat',
+    errorGeneric: 'Hiba történt',
+    successUserCreated: 'Felhasználó létrehozva:',
+    successUserDeleted: 'törölve',
+    successUserUpdated: 'frissítve',
+    successExported: 'felhasználó exportálva',
+    csvHeaderName: 'Név',
+    csvHeaderEmail: 'Email',
+    csvHeaderRole: 'Szerepkör',
+    csvHeaderStatus: 'Státusz',
+    csvHeaderPackage: 'Csomag',
+    csvHeaderMonthlyFee: 'Havi díj',
+    csvHeaderRegistered: 'Regisztrált',
+    csvYes: 'Igen',
+    csvNo: 'Nem',
+    csvFilenamePrefix: 'felhasznalok',
+  },
+  en: {
+    adminPanel: 'Admin panel',
+    newUser: 'Register new user',
+    totalUsers: 'Total users',
+    admins: 'Admins',
+    activePartners: 'Active partners',
+    monthlyRevenue: 'Monthly revenue',
+    tabUsers: 'Users',
+    tabModules: 'Modules',
+    tabStats: 'Statistics',
+    searchPlaceholder: 'Search by name or email...',
+    allRoles: 'All roles',
+    admin: 'Admin',
+    partner: 'Partner',
+    allPackages: 'All packages',
+    selected: 'selected',
+    csvExport: 'CSV export',
+    thName: 'Name',
+    thEmail: 'Email',
+    thRole: 'Role',
+    thStatus: 'Status',
+    thPackage: 'Package',
+    thMonthlyFee: 'Monthly fee',
+    thReg: 'Reg.',
+    thActions: 'Actions',
+    loading: 'Loading...',
+    noResults: 'No results',
+    notProvided: 'Not provided',
+    active: 'Active',
+    inactive: 'Inactive',
+    editTitle: 'Edit',
+    ban: 'Ban',
+    activate: 'Activate',
+    demoteToPartner: 'Demote to Partner',
+    promoteToAdmin: 'Promote to Admin',
+    deleteUserTitle: 'Delete user',
+    usersCount: 'user(s)',
+    filteredFrom: 'filtered from',
+    from: '',
+    globalModules: 'Global modules',
+    globalModulesDesc: 'Toggle modules globally. A disabled module is not accessible to anyone.',
+    userModuleAccess: 'User module access',
+    noPartnersYet: 'No partners yet',
+    chatMessages: 'Chat messages',
+    companiesInDb: 'Companies in database',
+    usersByPackage: 'Users by package',
+    usersChartLabel: 'Users',
+    recentRegistrations: 'Recent registrations',
+    thDate: 'Date',
+    statsLoadFailed: 'Failed to load statistics',
+    createUserTitle: 'Register new user',
+    fullName: 'Full name',
+    email: 'Email',
+    password: 'Password',
+    passwordHint: '(optional — if left empty, created as invitation)',
+    passwordPlaceholder: 'Min. 8 characters',
+    namePlaceholder: 'John Doe',
+    emailPlaceholder: 'example@email.com',
+    package: 'Package',
+    monthlyFeeFt: 'Monthly fee (Ft)',
+    administrator: 'Administrator',
+    cancel: 'Cancel',
+    creating: 'Creating...',
+    createUser: 'Create user',
+    editUserTitle: 'Edit user',
+    customMonthlyFee: 'Custom monthly fee (Ft)',
+    saving: 'Saving...',
+    save: 'Save',
+    deleteUserHeading: 'Delete user',
+    deleteConfirm: 'Are you sure you want to delete',
+    deleteConfirmSuffix: '? This action cannot be undone.',
+    deleting: 'Deleting...',
+    delete: 'Delete',
+    errorLoadUsers: 'Failed to load users',
+    errorLoadModules: 'Failed to load modules',
+    errorLoadStats: 'Failed to load statistics',
+    errorGeneric: 'An error occurred',
+    successUserCreated: 'User created:',
+    successUserDeleted: 'deleted',
+    successUserUpdated: 'updated',
+    successExported: 'user(s) exported',
+    csvHeaderName: 'Name',
+    csvHeaderEmail: 'Email',
+    csvHeaderRole: 'Role',
+    csvHeaderStatus: 'Status',
+    csvHeaderPackage: 'Package',
+    csvHeaderMonthlyFee: 'Monthly fee',
+    csvHeaderRegistered: 'Registered',
+    csvYes: 'Yes',
+    csvNo: 'No',
+    csvFilenamePrefix: 'users',
+  },
 }
 
-/* ───── Sparkline mini-chart ───── */
 
-function Sparkline({ data, color = '#D4A017' }: { data: number[]; color?: string }) {
-  const max = Math.max(...data)
-  const min = Math.min(...data)
-  const range = max - min || 1
-  const w = 60
-  const h = 24
-  const points = data.map((v, i) => {
-    const x = (i / (data.length - 1)) * w
-    const y = h - ((v - min) / range) * (h - 4) - 2
-    return `${x},${y}`
-  }).join(' ')
-
-  return (
-    <svg className="sparkline inline-block ml-2" width={w} height={h} viewBox={`0 0 ${w} ${h}`}>
-      <polyline fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" points={points} />
-    </svg>
-  )
-}
-
-// Mock 7-day trend data
-const MOCK_TRENDS = {
-  users: [3, 4, 4, 5, 5, 6, 6],
-  admins: [1, 1, 1, 1, 2, 2, 2],
-  active: [2, 3, 3, 4, 4, 5, 5],
-  revenue: [19800, 29700, 29700, 39600, 49500, 59400, 69300],
-}
 
 export function AdminPage() {
+  const lang = (localStorage.getItem('cegverzum_lang') as 'hu' | 'en') || 'hu'
+  const s = t[lang]
+
   const [tab, setTab] = useState<Tab>('felhasznalok')
   const [users, setUsers] = useState<User[]>([])
   const [loading, setLoading] = useState(true)
@@ -113,7 +261,7 @@ export function AdminPage() {
       const data = await adminApi.listAllUsers()
       setUsers(data)
     } catch {
-      setError('Nem sikerült betölteni a felhasználókat')
+      setError(s.errorLoadUsers)
     } finally {
       setLoading(false)
     }
@@ -135,7 +283,7 @@ export function AdminPage() {
       }))
       setUserModules(umMap)
     } catch {
-      setError('Nem sikerült betölteni a modulokat')
+      setError(s.errorLoadModules)
     } finally {
       setModulesLoading(false)
     }
@@ -147,7 +295,7 @@ export function AdminPage() {
       const data = await adminApi.getStats()
       setAdminStats(data)
     } catch {
-      setError('Nem sikerült betölteni a statisztikákat')
+      setError(s.errorLoadStats)
     } finally {
       setStatsLoading(false)
     }
@@ -169,12 +317,12 @@ export function AdminPage() {
         package: createPkg,
         monthly_price: createPrice,
       })
-      setSuccess(`Felhasználó létrehozva: ${createName || createEmail}`)
+      setSuccess(`${s.successUserCreated} ${createName || createEmail}`)
       setShowCreate(false)
       setCreateName(''); setCreateEmail(''); setCreatePassword(''); setCreateAdmin(false); setCreatePkg('free'); setCreatePrice(0)
       await loadUsers()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Hiba történt')
+      setError(err instanceof Error ? err.message : s.errorGeneric)
     } finally {
       setCreating(false)
     }
@@ -186,7 +334,7 @@ export function AdminPage() {
       else await adminApi.activatePartner(userId)
       await loadUsers()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Hiba történt')
+      setError(err instanceof Error ? err.message : s.errorGeneric)
     }
   }
 
@@ -195,7 +343,7 @@ export function AdminPage() {
       await adminApi.toggleUserRole(userId)
       await loadUsers()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Hiba történt')
+      setError(err instanceof Error ? err.message : s.errorGeneric)
     }
   }
 
@@ -204,12 +352,12 @@ export function AdminPage() {
     setDeleting(true)
     try {
       await adminApi.deleteUser(deletingUser.id)
-      setSuccess(`${deletingUser.full_name || deletingUser.email} törölve`)
+      setSuccess(`${deletingUser.full_name || deletingUser.email} ${s.successUserDeleted}`)
       setDeletingUser(null)
       setSelectedUsers(prev => { const next = new Set(prev); next.delete(deletingUser.id); return next })
       await loadUsers()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Hiba történt')
+      setError(err instanceof Error ? err.message : s.errorGeneric)
     } finally {
       setDeleting(false)
     }
@@ -242,10 +390,10 @@ export function AdminPage() {
       }
       await adminApi.updateUser(editingUser.id, data)
       setEditingUser(null)
-      setSuccess(`${editingUser.full_name || editingUser.email} frissítve`)
+      setSuccess(`${editingUser.full_name || editingUser.email} ${s.successUserUpdated}`)
       await loadUsers()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Hiba történt')
+      setError(err instanceof Error ? err.message : s.errorGeneric)
     } finally {
       setSaving(false)
     }
@@ -256,7 +404,7 @@ export function AdminPage() {
       const updated = await adminApi.toggleModule(moduleId)
       setModules(prev => prev.map(m => m.id === moduleId ? updated : m))
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Hiba történt')
+      setError(err instanceof Error ? err.message : s.errorGeneric)
     }
   }
 
@@ -270,7 +418,7 @@ export function AdminPage() {
         ),
       }))
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Hiba történt')
+      setError(err instanceof Error ? err.message : s.errorGeneric)
     }
   }
 
@@ -295,26 +443,26 @@ export function AdminPage() {
   const exportSelectedCsv = () => {
     const selected = users.filter(u => selectedUsers.has(u.id))
     if (selected.length === 0) return
-    const headers = ['Név', 'Email', 'Szerepkör', 'Státusz', 'Csomag', 'Havi díj', 'Regisztrált']
+    const headers = [s.csvHeaderName, s.csvHeaderEmail, s.csvHeaderRole, s.csvHeaderStatus, s.csvHeaderPackage, s.csvHeaderMonthlyFee, s.csvHeaderRegistered]
     const rows = selected.map(u => [
       u.full_name || '',
       u.email,
-      u.is_admin ? 'Admin' : 'Partner',
-      u.is_active ? 'Aktív' : 'Inaktív',
+      u.is_admin ? s.admin : s.partner,
+      u.is_active ? s.active : s.inactive,
       packageLabel(u.package),
       u.monthly_price.toString(),
-      u.has_registered ? 'Igen' : 'Nem',
+      u.has_registered ? s.csvYes : s.csvNo,
     ])
     const csv = [headers.join(','), ...rows.map(r => r.map(c => `"${c}"`).join(','))].join('\n')
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `felhasznalok_${new Date().toISOString().slice(0, 10)}.csv`
+    a.download = `${s.csvFilenamePrefix}_${new Date().toISOString().slice(0, 10)}.csv`
     a.click()
     URL.revokeObjectURL(url)
     setShowBulkMenu(false)
-    setSuccess(`${selected.length} felhasználó exportálva`)
+    setSuccess(`${selected.length} ${s.successExported}`)
   }
 
   // Filtered users
@@ -338,7 +486,7 @@ export function AdminPage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-navy dark:text-white">Admin panel</h1>
+        <h1 className="text-2xl font-bold text-navy dark:text-white">{s.adminPanel}</h1>
         <button
           onClick={() => setShowCreate(true)}
           className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-medium px-5 py-2.5 rounded-xl transition-colors border-none cursor-pointer shadow-sm btn-press"
@@ -346,39 +494,27 @@ export function AdminPage() {
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
           </svg>
-          Új felhasználó regisztrálása
+          {s.newUser}
         </button>
       </div>
 
-      {/* Stats cards with sparklines */}
+      {/* Stats cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm card-hover">
-          <p className="text-xs text-gray-500 uppercase tracking-wider">Összes felhasználó</p>
-          <div className="flex items-center mt-1">
-            <p className="text-2xl font-bold text-navy dark:text-white">{totalUsers}</p>
-            <Sparkline data={MOCK_TRENDS.users} color="#1E3A5F" />
-          </div>
+          <p className="text-xs text-gray-500 uppercase tracking-wider">{s.totalUsers}</p>
+          <p className="text-2xl font-bold text-navy dark:text-white mt-1">{totalUsers}</p>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm card-hover">
-          <p className="text-xs text-gray-500 uppercase tracking-wider">Adminok</p>
-          <div className="flex items-center mt-1">
-            <p className="text-2xl font-bold text-purple-600 mt-1">{adminCount}</p>
-            <Sparkline data={MOCK_TRENDS.admins} color="#9333ea" />
-          </div>
+          <p className="text-xs text-gray-500 uppercase tracking-wider">{s.admins}</p>
+          <p className="text-2xl font-bold text-purple-600 mt-1">{adminCount}</p>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm card-hover">
-          <p className="text-xs text-gray-500 uppercase tracking-wider">Aktív partnerek</p>
-          <div className="flex items-center mt-1">
-            <p className="text-2xl font-bold text-green-600 mt-1">{activeCount}</p>
-            <Sparkline data={MOCK_TRENDS.active} color="#16a34a" />
-          </div>
+          <p className="text-xs text-gray-500 uppercase tracking-wider">{s.activePartners}</p>
+          <p className="text-2xl font-bold text-green-600 mt-1">{activeCount}</p>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm card-hover">
-          <p className="text-xs text-gray-500 uppercase tracking-wider">Havi bevétel</p>
-          <div className="flex items-center mt-1">
-            <p className="text-2xl font-bold text-gold mt-1">{totalRevenue.toLocaleString('hu-HU')} Ft</p>
-            <Sparkline data={MOCK_TRENDS.revenue} />
-          </div>
+          <p className="text-xs text-gray-500 uppercase tracking-wider">{s.monthlyRevenue}</p>
+          <p className="text-2xl font-bold text-gold mt-1">{totalRevenue.toLocaleString('hu-HU')} Ft</p>
         </div>
       </div>
 
@@ -390,7 +526,7 @@ export function AdminPage() {
             tab === 'felhasznalok' ? 'bg-white dark:bg-gray-700 text-navy dark:text-white shadow-sm' : 'bg-transparent text-gray-500 hover:text-gray-700'
           }`}
         >
-          Felhasználók
+          {s.tabUsers}
         </button>
         <button
           onClick={() => setTab('modulok')}
@@ -398,7 +534,7 @@ export function AdminPage() {
             tab === 'modulok' ? 'bg-white dark:bg-gray-700 text-navy dark:text-white shadow-sm' : 'bg-transparent text-gray-500 hover:text-gray-700'
           }`}
         >
-          Modulok
+          {s.tabModules}
         </button>
         <button
           onClick={() => setTab('statisztikak')}
@@ -406,7 +542,7 @@ export function AdminPage() {
             tab === 'statisztikak' ? 'bg-white dark:bg-gray-700 text-navy dark:text-white shadow-sm' : 'bg-transparent text-gray-500 hover:text-gray-700'
           }`}
         >
-          Statisztikák
+          {s.tabStats}
         </button>
       </div>
 
@@ -438,18 +574,18 @@ export function AdminPage() {
               </svg>
               <input
                 type="text" value={search} onChange={e => setSearch(e.target.value)}
-                placeholder="Keresés név vagy email alapján..."
+                placeholder={s.searchPlaceholder}
                 className="w-full pl-9 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gold bg-white dark:bg-gray-800"
               />
             </div>
             <select value={filterRole} onChange={e => setFilterRole(e.target.value)} className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gold">
-              <option value="">Minden szerepkör</option>
-              <option value="admin">Admin</option>
-              <option value="normal">Partner</option>
+              <option value="">{s.allRoles}</option>
+              <option value="admin">{s.admin}</option>
+              <option value="normal">{s.partner}</option>
             </select>
             <select value={filterPkg} onChange={e => setFilterPkg(e.target.value)} className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-gold">
-              <option value="">Minden csomag</option>
-              {PACKAGES.map(p => <option key={p.value} value={p.value}>{p.label}</option>)}
+              <option value="">{s.allPackages}</option>
+              {PACKAGES.map(p => <option key={p.key} value={p.key}>{p.name}</option>)}
             </select>
 
             {/* Bulk actions */}
@@ -459,7 +595,7 @@ export function AdminPage() {
                   onClick={() => setShowBulkMenu(!showBulkMenu)}
                   className="flex items-center gap-2 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
                 >
-                  <span className="font-medium">{selectedUsers.size} kijelölve</span>
+                  <span className="font-medium">{selectedUsers.size} {s.selected}</span>
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
@@ -473,7 +609,7 @@ export function AdminPage() {
                       <svg className="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                       </svg>
-                      CSV exportálás
+                      {s.csvExport}
                     </button>
                   </div>
                 )}
@@ -495,21 +631,21 @@ export function AdminPage() {
                         className="w-4 h-4 rounded border-gray-300 accent-gold cursor-pointer"
                       />
                     </th>
-                    <th className="text-left px-4 py-3 font-medium text-gray-600 dark:text-gray-300">Név</th>
-                    <th className="text-left px-4 py-3 font-medium text-gray-600 dark:text-gray-300">Email</th>
-                    <th className="text-center px-4 py-3 font-medium text-gray-600 dark:text-gray-300">Szerepkör</th>
-                    <th className="text-center px-4 py-3 font-medium text-gray-600 dark:text-gray-300">Státusz</th>
-                    <th className="text-center px-4 py-3 font-medium text-gray-600 dark:text-gray-300">Csomag</th>
-                    <th className="text-right px-4 py-3 font-medium text-gray-600 dark:text-gray-300">Havi díj</th>
-                    <th className="text-center px-4 py-3 font-medium text-gray-600 dark:text-gray-300">Reg.</th>
-                    <th className="text-right px-4 py-3 font-medium text-gray-600 dark:text-gray-300">Műveletek</th>
+                    <th className="text-left px-4 py-3 font-medium text-gray-600 dark:text-gray-300">{s.thName}</th>
+                    <th className="text-left px-4 py-3 font-medium text-gray-600 dark:text-gray-300">{s.thEmail}</th>
+                    <th className="text-center px-4 py-3 font-medium text-gray-600 dark:text-gray-300">{s.thRole}</th>
+                    <th className="text-center px-4 py-3 font-medium text-gray-600 dark:text-gray-300">{s.thStatus}</th>
+                    <th className="text-center px-4 py-3 font-medium text-gray-600 dark:text-gray-300">{s.thPackage}</th>
+                    <th className="text-right px-4 py-3 font-medium text-gray-600 dark:text-gray-300">{s.thMonthlyFee}</th>
+                    <th className="text-center px-4 py-3 font-medium text-gray-600 dark:text-gray-300">{s.thReg}</th>
+                    <th className="text-right px-4 py-3 font-medium text-gray-600 dark:text-gray-300">{s.thActions}</th>
                   </tr>
                 </thead>
                 <tbody>
                   {loading ? (
-                    <tr><td colSpan={9} className="px-5 py-8 text-center text-gray-400">Betöltés...</td></tr>
+                    <tr><td colSpan={9} className="px-5 py-8 text-center text-gray-400">{s.loading}</td></tr>
                   ) : filteredUsers.length === 0 ? (
-                    <tr><td colSpan={9} className="px-5 py-8 text-center text-gray-400">Nincs találat</td></tr>
+                    <tr><td colSpan={9} className="px-5 py-8 text-center text-gray-400">{s.noResults}</td></tr>
                   ) : filteredUsers.map(user => (
                     <tr key={user.id} className="border-b border-gray-100 dark:border-gray-700 last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
                       <td className="text-center px-3 py-3">
@@ -526,19 +662,19 @@ export function AdminPage() {
                             {(user.full_name || user.email).charAt(0).toUpperCase()}
                           </div>
                           <span className="font-medium text-gray-900 dark:text-white truncate max-w-[150px]">
-                            {user.full_name || <span className="text-gray-400 italic text-xs">Nincs megadva</span>}
+                            {user.full_name || <span className="text-gray-400 italic text-xs">{s.notProvided}</span>}
                           </span>
                         </div>
                       </td>
                       <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{user.email}</td>
                       <td className="px-4 py-3 text-center">
-                        <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${user.is_admin ? 'bg-purple-100 text-purple-800' : 'bg-blue-100 text-blue-800'}`}>
-                          {user.is_admin ? 'Admin' : 'Partner'}
+                        <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${user.is_admin ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400' : 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'}`}>
+                          {user.is_admin ? s.admin : s.partner}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-center">
-                        <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${user.is_active ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-                          {user.is_active ? 'Aktív' : 'Inaktív'}
+                        <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${user.is_active ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400' : 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'}`}>
+                          {user.is_active ? s.active : s.inactive}
                         </span>
                       </td>
                       <td className="px-4 py-3 text-center">
@@ -558,7 +694,7 @@ export function AdminPage() {
                         <div className="flex items-center justify-end gap-1.5">
                           <button onClick={() => openEditUser(user)}
                             className="text-xs font-medium px-2.5 py-1 rounded-lg border-none cursor-pointer transition-colors bg-gold/10 text-gold-dark hover:bg-gold/20"
-                            title="Szerkesztés">
+                            title={s.editTitle}>
                             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                             </svg>
@@ -566,17 +702,17 @@ export function AdminPage() {
                           {!user.is_admin && (
                             <button onClick={() => handleToggle(user.id, user.is_active)}
                               className={`text-xs font-medium px-2.5 py-1 rounded-lg border-none cursor-pointer transition-colors ${user.is_active ? 'bg-red-50 text-red-700 hover:bg-red-100' : 'bg-green-50 text-green-700 hover:bg-green-100'}`}>
-                              {user.is_active ? 'Tiltás' : 'Aktiválás'}
+                              {user.is_active ? s.ban : s.activate}
                             </button>
                           )}
                           <button onClick={() => handleToggleRole(user.id)}
                             className="text-xs font-medium px-2.5 py-1 rounded-lg border-none cursor-pointer transition-colors bg-purple-50 text-purple-700 hover:bg-purple-100"
-                            title={user.is_admin ? 'Partner-ré visszaállítás' : 'Admin-ná kinevezés'}>
-                            {user.is_admin ? 'Partner' : 'Admin'}
+                            title={user.is_admin ? s.demoteToPartner : s.promoteToAdmin}>
+                            {user.is_admin ? s.partner : s.admin}
                           </button>
                           <button onClick={() => setDeletingUser(user)}
                             className="text-xs font-medium px-2.5 py-1 rounded-lg border-none cursor-pointer transition-colors bg-red-50 text-red-700 hover:bg-red-100"
-                            title="Felhasználó törlése">
+                            title={s.deleteUserTitle}>
                             <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
@@ -589,7 +725,7 @@ export function AdminPage() {
               </table>
             </div>
             <div className="px-4 py-3 bg-gray-50 dark:bg-gray-700 border-t border-gray-200 dark:border-gray-600 text-xs text-gray-500">
-              {filteredUsers.length} felhasználó{search || filterPkg || filterRole ? ` (szűrve ${users.length}-ből)` : ''}
+              {filteredUsers.length} {s.usersCount}{search || filterPkg || filterRole ? ` (${s.filteredFrom} ${users.length}${s.from})` : ''}
             </div>
           </div>
         </>
@@ -599,8 +735,8 @@ export function AdminPage() {
       {tab === 'modulok' && (
         <>
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 p-5 mb-6">
-            <h2 className="text-base font-semibold text-navy dark:text-white mb-3">Globális modulok</h2>
-            <p className="text-xs text-gray-500 mb-4">Globálisan ki/bekapcsolható modulok. Kikapcsolt modul senkinek sem elérhető.</p>
+            <h2 className="text-base font-semibold text-navy dark:text-white mb-3">{s.globalModules}</h2>
+            <p className="text-xs text-gray-500 mb-4">{s.globalModulesDesc}</p>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
               {modules.map(m => (
                 <div key={m.id} className={`rounded-xl border p-4 transition-colors ${m.is_active ? 'border-green-200 bg-green-50/50 dark:bg-green-900/10' : 'border-gray-200 bg-gray-50/50 dark:bg-gray-700/30 opacity-60'}`}>
@@ -619,18 +755,18 @@ export function AdminPage() {
 
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 overflow-hidden">
             <div className="px-5 py-3 border-b border-gray-200 dark:border-gray-600">
-              <h2 className="text-base font-semibold text-navy dark:text-white">Felhasználói modul hozzáférés</h2>
+              <h2 className="text-base font-semibold text-navy dark:text-white">{s.userModuleAccess}</h2>
             </div>
             {modulesLoading ? (
-              <div className="px-5 py-8 text-center text-gray-400">Betöltés...</div>
+              <div className="px-5 py-8 text-center text-gray-400">{s.loading}</div>
             ) : users.filter(u => !u.is_admin).length === 0 ? (
-              <div className="px-5 py-8 text-center text-gray-400">Még nincsenek partnerek</div>
+              <div className="px-5 py-8 text-center text-gray-400">{s.noPartnersYet}</div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead className="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                      <th className="text-left px-4 py-3 font-medium text-gray-600 dark:text-gray-300 whitespace-nowrap sticky left-0 bg-gray-50 dark:bg-gray-700 z-10">Partner</th>
+                      <th className="text-left px-4 py-3 font-medium text-gray-600 dark:text-gray-300 whitespace-nowrap sticky left-0 bg-gray-50 dark:bg-gray-700 z-10">{s.partner}</th>
                       {modules.map(m => (
                         <th key={m.id} className="text-center px-3 py-3 font-medium text-gray-600 dark:text-gray-300 whitespace-nowrap text-xs">{m.display_name}</th>
                       ))}
@@ -676,19 +812,19 @@ export function AdminPage() {
               {/* Stat cards */}
               <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider">Összes felhasználó</p>
+                  <p className="text-xs text-gray-500 uppercase tracking-wider">{s.totalUsers}</p>
                   <p className="text-2xl font-bold text-navy dark:text-white mt-1">{adminStats.total_users}</p>
                 </div>
                 <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider">Aktív partnerek</p>
+                  <p className="text-xs text-gray-500 uppercase tracking-wider">{s.activePartners}</p>
                   <p className="text-2xl font-bold text-green-600 mt-1">{adminStats.active_users}</p>
                 </div>
                 <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider">Havi bevétel</p>
+                  <p className="text-xs text-gray-500 uppercase tracking-wider">{s.monthlyRevenue}</p>
                   <p className="text-2xl font-bold text-gold mt-1">{adminStats.monthly_revenue.toLocaleString('hu-HU')} Ft</p>
                 </div>
                 <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider">Chat üzenetek</p>
+                  <p className="text-xs text-gray-500 uppercase tracking-wider">{s.chatMessages}</p>
                   <p className="text-2xl font-bold text-teal mt-1">{adminStats.total_chat_messages.toLocaleString('hu-HU')}</p>
                 </div>
               </div>
@@ -696,18 +832,18 @@ export function AdminPage() {
               {/* Additional info row */}
               <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
                 <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider">Cégek az adatbázisban</p>
+                  <p className="text-xs text-gray-500 uppercase tracking-wider">{s.companiesInDb}</p>
                   <p className="text-2xl font-bold text-navy dark:text-white mt-1">{adminStats.total_companies.toLocaleString('hu-HU')}</p>
                 </div>
                 <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider">Adminok</p>
+                  <p className="text-xs text-gray-500 uppercase tracking-wider">{s.admins}</p>
                   <p className="text-2xl font-bold text-purple-600 mt-1">{adminStats.admin_count}</p>
                 </div>
               </div>
 
               {/* Package chart */}
               <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm mb-6">
-                <h3 className="text-base font-semibold text-navy dark:text-white mb-4">Felhasználók csomagok szerint</h3>
+                <h3 className="text-base font-semibold text-navy dark:text-white mb-4">{s.usersByPackage}</h3>
                 <ResponsiveContainer width="100%" height={280}>
                   <BarChart data={[
                     { name: 'Free', count: adminStats.users_by_package.free || 0 },
@@ -719,7 +855,7 @@ export function AdminPage() {
                     <XAxis dataKey="name" tick={{ fontSize: 12 }} />
                     <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
                     <Tooltip />
-                    <Bar dataKey="count" name="Felhasználók" fill="#D4A017" radius={[6, 6, 0, 0]} />
+                    <Bar dataKey="count" name={s.usersChartLabel} fill="#D4A017" radius={[6, 6, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -727,16 +863,16 @@ export function AdminPage() {
               {/* Recent registrations */}
               <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
                 <div className="px-5 py-3 border-b border-gray-200 dark:border-gray-600">
-                  <h3 className="text-base font-semibold text-navy dark:text-white">Legutóbbi regisztrációk</h3>
+                  <h3 className="text-base font-semibold text-navy dark:text-white">{s.recentRegistrations}</h3>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full text-sm">
                     <thead className="bg-gray-50 dark:bg-gray-700">
                       <tr>
-                        <th className="text-left px-4 py-3 font-medium text-gray-600 dark:text-gray-300">Név</th>
-                        <th className="text-left px-4 py-3 font-medium text-gray-600 dark:text-gray-300">Email</th>
-                        <th className="text-center px-4 py-3 font-medium text-gray-600 dark:text-gray-300">Csomag</th>
-                        <th className="text-right px-4 py-3 font-medium text-gray-600 dark:text-gray-300">Dátum</th>
+                        <th className="text-left px-4 py-3 font-medium text-gray-600 dark:text-gray-300">{s.thName}</th>
+                        <th className="text-left px-4 py-3 font-medium text-gray-600 dark:text-gray-300">{s.thEmail}</th>
+                        <th className="text-center px-4 py-3 font-medium text-gray-600 dark:text-gray-300">{s.thPackage}</th>
+                        <th className="text-right px-4 py-3 font-medium text-gray-600 dark:text-gray-300">{s.thDate}</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -760,7 +896,7 @@ export function AdminPage() {
               </div>
             </>
           ) : (
-            <div className="text-center text-gray-400 py-12">Nem sikerült betölteni a statisztikákat</div>
+            <div className="text-center text-gray-400 py-12">{s.statsLoadFailed}</div>
           )}
         </>
       )}
@@ -770,7 +906,7 @@ export function AdminPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowCreate(false)}>
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg mx-4 p-6 animate-fade-in" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-5">
-              <h3 className="text-lg font-semibold text-navy dark:text-white">Új felhasználó regisztrálása</h3>
+              <h3 className="text-lg font-semibold text-navy dark:text-white">{s.createUserTitle}</h3>
               <button onClick={() => setShowCreate(false)} className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 bg-transparent border-none cursor-pointer">
                 <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
@@ -779,33 +915,33 @@ export function AdminPage() {
             <form onSubmit={handleCreateUser} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2 sm:col-span-1">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Teljes név</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{s.fullName}</label>
                   <input type="text" value={createName} onChange={e => setCreateName(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white dark:bg-gray-700" placeholder="Példa János" />
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white dark:bg-gray-700" placeholder={s.namePlaceholder} />
                 </div>
                 <div className="col-span-2 sm:col-span-1">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email *</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{s.email} *</label>
                   <input type="email" value={createEmail} onChange={e => setCreateEmail(e.target.value)} required
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white dark:bg-gray-700" placeholder="pelda@email.hu" />
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white dark:bg-gray-700" placeholder={s.emailPlaceholder} />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Jelszó <span className="text-gray-400 font-normal">(opcionális — ha üresen hagyja, meghívóként jön létre)</span></label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{s.password} <span className="text-gray-400 font-normal">{s.passwordHint}</span></label>
                 <input type="password" value={createPassword} onChange={e => setCreatePassword(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white dark:bg-gray-700" placeholder="Min. 8 karakter" />
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white dark:bg-gray-700" placeholder={s.passwordPlaceholder} />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Csomag</label>
-                  <select value={createPkg} onChange={e => { setCreatePkg(e.target.value); setCreatePrice(PACKAGES.find(p => p.value === e.target.value)?.price || 0) }}
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{s.package}</label>
+                  <select value={createPkg} onChange={e => { setCreatePkg(e.target.value); setCreatePrice(PACKAGES.find(p => p.key === e.target.value)?.price || 0) }}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white dark:bg-gray-700">
-                    {PACKAGES.map(p => <option key={p.value} value={p.value}>{p.label} — {p.price === 0 ? 'Ingyenes' : `${p.price.toLocaleString('hu-HU')} Ft/hó`}</option>)}
+                    {PACKAGES.map(p => <option key={p.key} value={p.key}>{p.name} — {formatPrice(p.price)}</option>)}
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Havi díj (Ft)</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{s.monthlyFeeFt}</label>
                   <input type="number" value={createPrice} onChange={e => setCreatePrice(Number(e.target.value))}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-500 bg-white dark:bg-gray-700" />
                 </div>
@@ -816,17 +952,17 @@ export function AdminPage() {
                   className={`relative w-10 h-5 rounded-full transition-colors border-none cursor-pointer ${createAdmin ? 'bg-purple-500' : 'bg-gray-300'}`}>
                   <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform ${createAdmin ? 'translate-x-5' : ''}`} />
                 </button>
-                <span className="text-sm text-gray-700 dark:text-gray-300">Adminisztrátor</span>
+                <span className="text-sm text-gray-700 dark:text-gray-300">{s.administrator}</span>
               </div>
 
               <div className="flex gap-2 pt-2">
                 <button type="button" onClick={() => setShowCreate(false)}
                   className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer bg-transparent">
-                  Mégse
+                  {s.cancel}
                 </button>
                 <button type="submit" disabled={creating}
                   className="flex-1 px-4 py-2.5 bg-green-600 hover:bg-green-700 disabled:opacity-50 text-white font-medium rounded-lg text-sm transition-colors cursor-pointer border-none btn-press">
-                  {creating ? 'Létrehozás...' : 'Felhasználó létrehozása'}
+                  {creating ? s.creating : s.createUser}
                 </button>
               </div>
             </form>
@@ -839,7 +975,7 @@ export function AdminPage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setEditingUser(null)}>
           <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-lg mx-4 p-6 animate-fade-in" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-5">
-              <h3 className="text-lg font-semibold text-navy dark:text-white">Felhasználó szerkesztése</h3>
+              <h3 className="text-lg font-semibold text-navy dark:text-white">{s.editUserTitle}</h3>
               <button onClick={() => setEditingUser(null)} className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 bg-transparent border-none cursor-pointer">
                 <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
               </button>
@@ -848,32 +984,32 @@ export function AdminPage() {
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Teljes név</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{s.fullName}</label>
                   <input type="text" value={editName} onChange={e => setEditName(e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gold bg-white dark:bg-gray-700" placeholder="Példa János" />
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gold bg-white dark:bg-gray-700" placeholder={s.namePlaceholder} />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{s.email}</label>
                   <input type="email" value={editEmail} onChange={e => setEditEmail(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gold bg-white dark:bg-gray-700" />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Csomag</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{s.package}</label>
                 <div className="grid grid-cols-2 gap-2">
                   {PACKAGES.map(p => (
-                    <button key={p.value} onClick={() => { setEditPkg(p.value); setEditPrice(p.price) }}
-                      className={`p-3 rounded-xl border-2 text-left cursor-pointer transition-all ${editPkg === p.value ? 'border-gold bg-gold/5 ring-2 ring-gold/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 bg-transparent'}`}>
-                      <span className="text-sm font-semibold block">{p.label}</span>
-                      <span className="text-xs text-gray-500">{p.price === 0 ? 'Ingyenes' : `${p.price.toLocaleString('hu-HU')} Ft/hó`}</span>
+                    <button key={p.key} onClick={() => { setEditPkg(p.key); setEditPrice(p.price) }}
+                      className={`p-3 rounded-xl border-2 text-left cursor-pointer transition-all ${editPkg === p.key ? 'border-gold bg-gold/5 ring-2 ring-gold/20' : 'border-gray-200 dark:border-gray-600 hover:border-gray-300 bg-transparent'}`}>
+                      <span className="text-sm font-semibold block">{p.name}</span>
+                      <span className="text-xs text-gray-500">{formatPrice(p.price)}</span>
                     </button>
                   ))}
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Egyedi havi díj (Ft)</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{s.customMonthlyFee}</label>
                 <input type="number" value={editPrice} onChange={e => setEditPrice(Number(e.target.value))}
                   className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gold bg-white dark:bg-gray-700" />
               </div>
@@ -884,14 +1020,14 @@ export function AdminPage() {
                     className={`relative w-10 h-5 rounded-full transition-colors border-none cursor-pointer ${editActive ? 'bg-green-500' : 'bg-gray-300'}`}>
                     <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform ${editActive ? 'translate-x-5' : ''}`} />
                   </button>
-                  <span className="text-sm text-gray-700 dark:text-gray-300">Aktív</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">{s.active}</span>
                 </div>
                 <div className="flex items-center gap-3">
                   <button type="button" onClick={() => setEditAdmin(!editAdmin)}
                     className={`relative w-10 h-5 rounded-full transition-colors border-none cursor-pointer ${editAdmin ? 'bg-purple-500' : 'bg-gray-300'}`}>
                     <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform ${editAdmin ? 'translate-x-5' : ''}`} />
                   </button>
-                  <span className="text-sm text-gray-700 dark:text-gray-300">Adminisztrátor</span>
+                  <span className="text-sm text-gray-700 dark:text-gray-300">{s.administrator}</span>
                 </div>
               </div>
             </div>
@@ -899,11 +1035,11 @@ export function AdminPage() {
             <div className="flex gap-2 pt-4">
               <button onClick={() => setEditingUser(null)}
                 className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer bg-transparent">
-                Mégse
+                {s.cancel}
               </button>
               <button onClick={handleEditSave} disabled={saving}
                 className="flex-1 px-4 py-2.5 bg-gold hover:bg-gold-light disabled:opacity-50 text-white font-medium rounded-lg text-sm transition-colors cursor-pointer border-none btn-press">
-                {saving ? 'Mentés...' : 'Mentés'}
+                {saving ? s.saving : s.save}
               </button>
             </div>
           </div>
@@ -920,19 +1056,19 @@ export function AdminPage() {
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                 </svg>
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Felhasználó törlése</h3>
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{s.deleteUserHeading}</h3>
               <p className="text-sm text-gray-500 mt-2">
-                Biztosan törölni szeretné <strong>{deletingUser.full_name || deletingUser.email}</strong> felhasználót? Ez a művelet nem vonható vissza.
+                {s.deleteConfirm} <strong>{deletingUser.full_name || deletingUser.email}</strong>{s.deleteConfirmSuffix}
               </p>
             </div>
             <div className="flex gap-2">
               <button onClick={() => setDeletingUser(null)}
                 className="flex-1 px-4 py-2.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors cursor-pointer bg-transparent">
-                Mégse
+                {s.cancel}
               </button>
               <button onClick={handleDeleteUser} disabled={deleting}
                 className="flex-1 px-4 py-2.5 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-medium rounded-lg text-sm transition-colors cursor-pointer border-none btn-press">
-                {deleting ? 'Törlés...' : 'Törlés'}
+                {deleting ? s.deleting : s.delete}
               </button>
             </div>
           </div>

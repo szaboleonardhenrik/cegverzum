@@ -244,6 +244,109 @@ export interface WatchlistStatus {
   watchlist_item_id: number | null
 }
 
+// Financial Analysis
+export interface YearlyMetric {
+  ev: number
+  netto_arbevetel: number | null
+  uzemi_eredmeny: number | null
+  adozott_eredmeny: number | null
+  sajat_toke: number | null
+  kotelezettsegek: number | null
+  eszkozok_osszesen: number | null
+  forgoeszkozok: number | null
+  rovid_lejaratu_kotelezettsegek: number | null
+  eladosodottsag_foka: number | null
+  arbevetel_aranyos_eredmeny: number | null
+  likviditasi_gyorsrata: number | null
+  roe: number | null
+  ebitda: number | null
+  novekedesi_rata: number | null
+}
+
+export interface FinancialAnalysis {
+  company_id: number
+  company_name: string
+  teaor_kod: string | null
+  yearly_metrics: YearlyMetric[]
+  avg_profit_margin: number | null
+  avg_roe: number | null
+  avg_debt_ratio: number | null
+  avg_liquidity: number | null
+  revenue_cagr: number | null
+}
+
+export interface CompanyCompareItem {
+  company_id: number
+  company_name: string
+  yearly_metrics: YearlyMetric[]
+  avg_profit_margin: number | null
+  avg_roe: number | null
+  avg_debt_ratio: number | null
+  avg_liquidity: number | null
+}
+
+export interface CompareResponse {
+  companies: CompanyCompareItem[]
+}
+
+export interface BenchmarkMetric {
+  metric: string
+  company_value: number | null
+  industry_avg: number | null
+  position: string | null
+}
+
+export interface BenchmarkResponse {
+  company_id: number
+  company_name: string
+  teaor_kod: string | null
+  teaor_megnevezes: string | null
+  industry_company_count: number
+  metrics: BenchmarkMetric[]
+}
+
+// Risk Analysis
+export interface RiskFactor {
+  category: string
+  description: string
+  points_deducted: number
+}
+
+export interface RiskAnalysis {
+  company_id: number
+  company_name: string
+  statusz: string
+  risk_score: number
+  risk_level: string
+  risk_color: string
+  partner_rating: string
+  factors: RiskFactor[]
+  negative_events: string[]
+  alapitas_datuma: string | null
+  teaor_kod: string | null
+  nav_torlesve: boolean | null
+  nav_kockazat: string | null
+  eladosodottsag_foka: number | null
+  sajat_toke: number | null
+  likviditasi_gyorsrata: number | null
+  adozott_eredmeny: number | null
+}
+
+export interface WatchlistRiskItem {
+  company_id: number
+  company_name: string
+  statusz: string
+  risk_score: number
+  risk_level: string
+  risk_color: string
+  partner_rating: string
+}
+
+export interface WatchlistOverview {
+  items: WatchlistRiskItem[]
+  summary: Record<string, number>
+}
+
 export interface NavTaxpayerResponse {
   success: boolean
   funcCode: string | null

@@ -216,6 +216,9 @@ export function ApiLandingPage() {
     (localStorage.getItem('cegverzum_lang') as 'hu' | 'en') || 'hu'
   )
 
+  // Pre-selected plan from pricing buttons
+  const [selectedPlan, setSelectedPlan] = useState('')
+
   // Contact form
   const [formName, setFormName] = useState('')
   const [formCompany, setFormCompany] = useState('')
@@ -260,7 +263,7 @@ export function ApiLandingPage() {
     e.preventDefault()
     setFormError('')
     if (!formName.trim() || !formEmail.trim()) {
-      setFormError(lang === 'hu' ? 'Kerjuk, toltse ki a kotelezo mezoket.' : 'Please fill in the required fields.')
+      setFormError(lang === 'hu' ? 'Kérjük, töltse ki a kötelező mezőket.' : 'Please fill in the required fields.')
       return
     }
     setFormLoading(true)
@@ -310,7 +313,7 @@ print(company["adoszam"])   # "12345678-2-42"`
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Link to="/" className="text-xl font-bold tracking-tight no-underline text-gray-900 dark:text-white">
-              <span className="text-gold">Ceg</span>verzum
+              <span className="text-gold">Cég</span>verzum
             </Link>
             <span className="hidden sm:inline text-xs font-mono bg-navy/10 dark:bg-navy/30 text-navy dark:text-teal-light px-2 py-0.5 rounded">API</span>
           </div>
@@ -382,7 +385,7 @@ print(company["adoszam"])   # "12345678-2-42"`
               {'{'} "company": {'{'}<br />
               &nbsp;&nbsp;"nev": "Pelda Kft.",<br />
               &nbsp;&nbsp;"adoszam": "12345678",<br />
-              &nbsp;&nbsp;"statusz": "Aktiv"<br />
+              &nbsp;&nbsp;"statusz": "Aktív"<br />
               {'}'} {'}'}
             </div>
             <div className="absolute bottom-20 right-10 text-white font-mono text-xs leading-6 hidden lg:block">
@@ -546,9 +549,9 @@ print(company["adoszam"])   # "12345678-2-42"`
   "adoszam": "12345678-2-42",
   "cegjegyzekszam": "01-09-123456",
   "szekhely": "1051 Budapest, Nador u. 1.",
-  "statusz": "Aktiv",
+  "statusz": "Aktív",
   "teaor_kod": "6201",
-  "fotevekenyseg": "Szamitogépes programozas",
+  "fotevekenyseg": "Számítógépes programozás",
   "alapitas_datuma": "2015-03-15"
 }`}
               </pre>
@@ -577,7 +580,7 @@ print(company["adoszam"])   # "12345678-2-42"`
               >
                 {plan.highlighted && (
                   <div className="text-xs font-bold text-teal uppercase tracking-wider mb-4">
-                    {lang === 'hu' ? 'Ajanlott' : 'Recommended'}
+                    {lang === 'hu' ? 'Ajánlott' : 'Recommended'}
                   </div>
                 )}
                 <h3 className="text-xl font-bold text-gray-900 dark:text-white">{plan.name}</h3>
@@ -596,7 +599,7 @@ print(company["adoszam"])   # "12345678-2-42"`
                   ))}
                 </ul>
                 <button
-                  onClick={() => scrollTo('#kapcsolat')}
+                  onClick={() => { setSelectedPlan(plan.name); scrollTo('#kapcsolat') }}
                   className={`w-full mt-8 font-semibold rounded-xl px-6 py-3 transition-colors border-none cursor-pointer text-base ${
                     plan.highlighted
                       ? 'bg-gold hover:bg-gold-light text-white shadow-lg shadow-gold/25'
@@ -692,6 +695,26 @@ print(company["adoszam"])   # "12345678-2-42"`
                 </div>
               ) : (
                 <form onSubmit={handleContactSubmit} className="space-y-4">
+                  {selectedPlan && (
+                    <div className="flex items-center gap-2 bg-gold/10 border border-gold/30 rounded-lg px-4 py-2.5">
+                      <svg className="w-4 h-4 text-gold shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {lang === 'hu' ? 'Választott csomag:' : 'Selected plan:'}{' '}
+                        <span className="text-gold font-bold">{selectedPlan}</span>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedPlan('')}
+                        className="ml-auto text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer p-0"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{s.contactName} *</label>
@@ -743,7 +766,7 @@ print(company["adoszam"])   # "12345678-2-42"`
       <section className="py-20 sm:py-28 bg-gradient-to-br from-navy via-navy-light to-teal-dark">
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl sm:text-4xl font-bold text-white">
-            {lang === 'hu' ? 'Kesz az integrációra?' : 'Ready to integrate?'}
+            {lang === 'hu' ? 'Kész az integrációra?' : 'Ready to integrate?'}
           </h2>
           <p className="mt-4 text-lg text-white/70">
             {lang === 'hu'
@@ -773,13 +796,13 @@ print(company["adoszam"])   # "12345678-2-42"`
           <div className="flex flex-col sm:flex-row items-center justify-between gap-6">
             <div>
               <div className="text-xl font-bold text-white mb-2">
-                <span className="text-gold">Ceg</span>verzum <span className="text-sm font-normal text-gray-500">API</span>
+                <span className="text-gold">Cég</span>verzum <span className="text-sm font-normal text-gray-500">API</span>
               </div>
               <p className="text-sm max-w-md">{s.footerDesc}</p>
             </div>
             <div className="flex items-center gap-4 text-sm">
               <Link to="/" className="text-gray-400 hover:text-white transition-colors no-underline">
-                {lang === 'hu' ? 'Fooldal' : 'Homepage'}
+                {lang === 'hu' ? 'Főoldal' : 'Homepage'}
               </Link>
               <Link to="/login" className="text-gray-400 hover:text-white transition-colors no-underline">
                 {s.login}
@@ -788,7 +811,7 @@ print(company["adoszam"])   # "12345678-2-42"`
             </div>
           </div>
           <div className="mt-8 pt-6 border-t border-gray-800 text-center text-xs text-gray-500">
-            &copy; {new Date().getFullYear()} Cegverzum. {s.copyright}
+            &copy; {new Date().getFullYear()} Cégverzum. {s.copyright}
           </div>
         </div>
       </footer>

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { PACKAGES, formatPriceNumber, pricePeriod } from '../config/pricing'
 import { SEO } from '../components/SEO'
 
@@ -10,6 +10,47 @@ function Ico({ d, className = 'w-6 h-6' }: { d: string; className?: string }) {
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d={d} />
     </svg>
   )
+}
+
+/* ───────── scroll-reveal hook ───────── */
+function useInView(threshold = 0.15) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [isVisible, setIsVisible] = useState(false)
+  useEffect(() => {
+    const el = ref.current
+    if (!el) return
+    const obs = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setIsVisible(true); obs.disconnect() } },
+      { threshold }
+    )
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [threshold])
+  return { ref, isVisible }
+}
+
+/* ───────── animated counter ───────── */
+function AnimatedCounter({ value, isVisible }: { value: string; isVisible: boolean }) {
+  const [display, setDisplay] = useState(value)
+  useEffect(() => {
+    const match = value.match(/^([\d\s]+)(.*)$/)
+    if (!match || !isVisible) return
+    const target = parseInt(match[1].replace(/\s/g, ''), 10)
+    const suffix = match[2]
+    const steps = 40
+    const stepTime = 1500 / steps
+    let step = 0
+    setDisplay('0' + suffix)
+    const timer = setInterval(() => {
+      step++
+      const eased = 1 - Math.pow(1 - step / steps, 3)
+      const current = Math.round(target * eased)
+      setDisplay(current.toLocaleString('hu-HU').replace(/,/g, ' ') + suffix)
+      if (step >= steps) clearInterval(timer)
+    }, stepTime)
+    return () => clearInterval(timer)
+  }, [value, isVisible])
+  return <>{display}</>
 }
 
 /* ───────── i18n ───────── */
@@ -280,6 +321,10 @@ export function LandingPage() {
     (localStorage.getItem('cegverzum_lang') as 'hu' | 'en') || 'hu'
   )
 
+  // Pre-selected package (from pricing buttons or URL param)
+  const [searchParams] = useSearchParams()
+  const [selectedPackage, setSelectedPackage] = useState(() => searchParams.get('pkg') || '')
+
   // Quote form state
   const [quoteName, setQuoteName] = useState('')
   const [quoteCompany, setQuoteCompany] = useState('')
@@ -288,6 +333,16 @@ export function LandingPage() {
   const [quoteSuccess, setQuoteSuccess] = useState(false)
   const [quoteLoading, setQuoteLoading] = useState(false)
 
+  // Scroll-reveal refs
+  const heroStats = useInView(0.2)
+  const featuresSection = useInView()
+  const statsSection = useInView(0.3)
+  const aboutSection = useInView()
+  const pricingSection = useInView()
+  const testimonialsSection = useInView()
+  const quoteSection = useInView()
+  const apiSection = useInView()
+
   const s = t[lang]
 
   useEffect(() => {
@@ -295,6 +350,13 @@ export function LandingPage() {
     window.addEventListener('scroll', onScroll, { passive: true })
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
+
+  // Auto-scroll to quote form if ?pkg= param is present
+  useEffect(() => {
+    if (searchParams.get('pkg')) {
+      setTimeout(() => document.getElementById('ajanlatkeres')?.scrollIntoView({ behavior: 'smooth' }), 300)
+    }
+  }, [searchParams])
 
   const toggleLang = () => {
     const next = lang === 'hu' ? 'en' : 'hu'
@@ -324,6 +386,7 @@ export function LandingPage() {
     }
     setQuoteLoading(true)
     // Simulate sending — in production this would call a real API
+    // Data: { name: quoteName, company: quoteCompany, email: quoteEmail, package: selectedPackage }
     await new Promise(resolve => setTimeout(resolve, 1000))
     setQuoteSuccess(true)
     setQuoteLoading(false)
@@ -454,9 +517,9 @@ export function LandingPage() {
       {/* HERO — white background with gold accents */}
       <section className="relative overflow-hidden bg-white dark:bg-slate-950 pt-28 pb-20 sm:pt-36 sm:pb-28">
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-gold/10 blur-[120px]" />
-          <div className="absolute -bottom-40 -left-40 w-[400px] h-[400px] rounded-full bg-gold/12 blur-[100px]" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] rounded-full bg-teal/5 blur-[140px]" />
+          <div className="absolute -top-40 -right-40 w-[500px] h-[500px] rounded-full bg-gold/10 blur-[120px] animate-float" />
+          <div className="absolute -bottom-40 -left-40 w-[400px] h-[400px] rounded-full bg-gold/12 blur-[100px] animate-float-slow" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] rounded-full bg-teal/5 blur-[140px] animate-float" />
         </div>
 
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -481,10 +544,12 @@ export function LandingPage() {
             </button>
           </div>
 
-          <div className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
+          <div ref={heroStats.ref} className="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
             {s.heroStats.map(st => (
               <div key={st.label} className="bg-white dark:bg-slate-800 rounded-xl px-4 py-5 text-center border border-gold/20 dark:border-gold/15 shadow-sm">
-                <div className="text-2xl sm:text-3xl font-bold text-gold dark:text-gold">{st.value}</div>
+                <div className="text-2xl sm:text-3xl font-bold text-gold dark:text-gold">
+                  <AnimatedCounter value={st.value} isVisible={heroStats.isVisible} />
+                </div>
                 <div className="mt-1 text-xs sm:text-sm text-gray-500 dark:text-gray-400">{st.label}</div>
               </div>
             ))}
@@ -493,9 +558,9 @@ export function LandingPage() {
       </section>
 
       {/* FEATURES GRID */}
-      <section id="szolgaltatasok" className="py-20 sm:py-28 bg-gray-50 dark:bg-slate-900">
+      <section id="szolgaltatasok" ref={featuresSection.ref} className="py-20 sm:py-28 bg-gray-50 dark:bg-slate-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-16">
+          <div className={`text-center max-w-2xl mx-auto mb-16 animate-on-scroll ${featuresSection.isVisible ? 'is-visible' : ''}`}>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">{s.featuresTitle}</h2>
             <p className="mt-4 text-gray-500 dark:text-gray-400">{s.featuresSub}</p>
           </div>
@@ -514,17 +579,18 @@ export function LandingPage() {
                   <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">{f.desc}</p>
                   {isApi && (
                     <span className="inline-block mt-3 text-sm font-medium text-navy dark:text-teal-light">
-                      {lang === 'hu' ? 'Tovabb →' : 'Learn more →'}
+                      {lang === 'hu' ? 'Tovább →' : 'Learn more →'}
                     </span>
                   )}
                 </div>
               )
+              const stagger = `animate-on-scroll stagger-${i + 1} ${featuresSection.isVisible ? 'is-visible' : ''}`
               return isApi ? (
-                <Link key={f.title} to="/api" className="no-underline">
+                <Link key={f.title} to="/api" className={`no-underline ${stagger}`}>
                   {card}
                 </Link>
               ) : (
-                <div key={f.title}>{card}</div>
+                <div key={f.title} className={stagger}>{card}</div>
               )
             })}
           </div>
@@ -532,11 +598,13 @@ export function LandingPage() {
       </section>
 
       {/* STATS BAND */}
-      <section className="bg-gradient-to-r from-navy to-teal-dark py-16">
+      <section ref={statsSection.ref} className="bg-gradient-to-r from-navy to-teal-dark py-16">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           {s.stats.map(st => (
-            <div key={st.label}>
-              <div className="text-3xl sm:text-4xl font-extrabold text-white">{st.value}</div>
+            <div key={st.label} className={`animate-on-scroll ${statsSection.isVisible ? 'is-visible' : ''}`}>
+              <div className="text-3xl sm:text-4xl font-extrabold text-white">
+                <AnimatedCounter value={st.value} isVisible={statsSection.isVisible} />
+              </div>
               <div className="mt-2 text-sm text-white/60">{st.label}</div>
             </div>
           ))}
@@ -544,9 +612,9 @@ export function LandingPage() {
       </section>
 
       {/* ABOUT / WHY */}
-      <section id="rolunk" className="py-20 sm:py-28 bg-white dark:bg-slate-950">
+      <section id="rolunk" ref={aboutSection.ref} className="py-20 sm:py-28 bg-white dark:bg-slate-950">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-center">
+          <div className={`grid lg:grid-cols-2 gap-12 lg:gap-20 items-center animate-on-scroll ${aboutSection.isVisible ? 'is-visible' : ''}`}>
             <div>
               <h2 className="text-3xl sm:text-4xl font-bold mb-6 text-gray-900 dark:text-white">{s.aboutTitle}</h2>
               <p className="text-gray-600 dark:text-gray-400 leading-relaxed mb-4">{s.aboutP1}</p>
@@ -569,9 +637,9 @@ export function LandingPage() {
       </section>
 
       {/* PRICING */}
-      <section id="arak" className="py-20 sm:py-28 bg-gray-50 dark:bg-slate-900">
+      <section id="arak" ref={pricingSection.ref} className="py-20 sm:py-28 bg-gray-50 dark:bg-slate-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-2xl mx-auto mb-16">
+          <div className={`text-center max-w-2xl mx-auto mb-16 animate-on-scroll ${pricingSection.isVisible ? 'is-visible' : ''}`}>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">{s.pricingTitle}</h2>
             <p className="mt-4 text-gray-500 dark:text-gray-400">{s.pricingSub}</p>
           </div>
@@ -582,7 +650,7 @@ export function LandingPage() {
                 key={plan.name}
                 className={`rounded-2xl p-6 sm:p-8 border transition-all ${
                   plan.highlighted
-                    ? 'bg-white dark:bg-slate-800 border-navy shadow-xl shadow-navy/10 ring-2 ring-navy/20 scale-105'
+                    ? 'bg-white dark:bg-slate-800 border-navy shadow-xl shadow-navy/10 ring-2 ring-navy/20 scale-105 animate-glow-pulse'
                     : 'bg-white dark:bg-slate-800 border-gray-200 dark:border-slate-700 hover:shadow-lg'
                 }`}
               >
@@ -607,7 +675,7 @@ export function LandingPage() {
                   ))}
                 </ul>
                 <button
-                  onClick={() => plan.highlighted || plan.name === 'Basic' ? scrollTo('#cegellenorzo') : scrollTo('#ajanlatkeres')}
+                  onClick={() => { setSelectedPackage(plan.name); scrollTo('#ajanlatkeres') }}
                   className={`w-full mt-8 font-semibold rounded-xl px-6 py-3 transition-colors border-none cursor-pointer text-base ${
                     plan.highlighted
                       ? 'bg-navy hover:bg-navy-light text-white shadow-lg shadow-navy/25'
@@ -631,9 +699,9 @@ export function LandingPage() {
       </section>
 
       {/* TESTIMONIALS — auto-scroll marquee */}
-      <section id="velemenyek" className="py-20 sm:py-28 bg-white dark:bg-slate-950 overflow-hidden">
+      <section id="velemenyek" ref={testimonialsSection.ref} className="py-20 sm:py-28 bg-white dark:bg-slate-950 overflow-hidden">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12">
-          <div className="text-center max-w-2xl mx-auto">
+          <div className={`text-center max-w-2xl mx-auto animate-on-scroll ${testimonialsSection.isVisible ? 'is-visible' : ''}`}>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">{s.testimonialsTitle}</h2>
             <p className="mt-4 text-gray-500 dark:text-gray-400">{s.testimonialsSub}</p>
           </div>
@@ -679,9 +747,9 @@ export function LandingPage() {
       </section>
 
       {/* QUOTE REQUEST (Ajánlatkérés) */}
-      <section id="ajanlatkeres" className="py-20 sm:py-28 bg-gray-50 dark:bg-slate-900">
+      <section id="ajanlatkeres" ref={quoteSection.ref} className="py-20 sm:py-28 bg-gray-50 dark:bg-slate-900">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className={`grid lg:grid-cols-2 gap-12 items-center animate-on-scroll ${quoteSection.isVisible ? 'is-visible' : ''}`}>
             {/* Left: text */}
             <div>
               <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white">{s.quoteTitle}</h2>
@@ -713,6 +781,26 @@ export function LandingPage() {
                 </div>
               ) : (
                 <form onSubmit={handleQuoteSubmit} className="space-y-4">
+                  {selectedPackage && (
+                    <div className="flex items-center gap-2 bg-gold/10 border border-gold/30 rounded-lg px-4 py-2.5">
+                      <svg className="w-4 h-4 text-gold shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                        {lang === 'hu' ? 'Választott csomag:' : 'Selected package:'}{' '}
+                        <span className="text-gold font-bold">{selectedPackage}</span>
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedPackage('')}
+                        className="ml-auto text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer p-0"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+                  )}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">{s.quoteName} *</label>
                     <input
@@ -752,12 +840,12 @@ export function LandingPage() {
       </section>
 
       {/* API HIGHLIGHT BANNER */}
-      <section className="py-16 sm:py-20 bg-gray-50 dark:bg-slate-900">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section ref={apiSection.ref} className="py-16 sm:py-20 bg-gray-50 dark:bg-slate-900">
+        <div className={`max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 animate-on-scroll ${apiSection.isVisible ? 'is-visible' : ''}`}>
           <div className="bg-gradient-to-br from-navy via-navy-light to-teal-dark rounded-2xl p-8 sm:p-12 relative overflow-hidden">
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-              <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-gold/10 blur-[80px]" />
-              <div className="absolute -bottom-20 -left-20 w-48 h-48 rounded-full bg-teal/15 blur-[60px]" />
+              <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full bg-gold/10 blur-[80px] animate-float" />
+              <div className="absolute -bottom-20 -left-20 w-48 h-48 rounded-full bg-teal/15 blur-[60px] animate-float-slow" />
             </div>
             <div className="relative grid sm:grid-cols-2 gap-8 items-center">
               <div>
@@ -766,33 +854,33 @@ export function LandingPage() {
                   <span className="text-xs text-white/80 font-medium">API</span>
                 </div>
                 <h3 className="text-2xl sm:text-3xl font-bold text-white mb-3">
-                  {lang === 'hu' ? 'API osszekottetes' : 'API Integration'}
+                  {lang === 'hu' ? 'API összeköttetés' : 'API Integration'}
                 </h3>
                 <p className="text-white/70 text-sm leading-relaxed mb-6">
                   {lang === 'hu'
-                    ? 'Csatlakoztassa sajat CRM, ERP vagy egyeb rendszeret a Cegverzum adatbazishoz. RESTful API, JSON valaszok, reszletes dokumentacio.'
-                    : 'Connect your own CRM, ERP or other system to the Cegverzum database. RESTful API, JSON responses, detailed documentation.'}
+                    ? 'Csatlakoztassa saját CRM, ERP vagy egyéb rendszerét a Cégverzum adatbázishoz. RESTful API, JSON válaszok, részletes dokumentáció.'
+                    : 'Connect your own CRM, ERP or other system to the Cégverzum database. RESTful API, JSON responses, detailed documentation.'}
                 </p>
                 <div className="flex items-baseline gap-2 mb-6">
                   <span className="text-3xl font-extrabold text-white">{lang === 'hu' ? '49 900' : '49,900'}</span>
-                  <span className="text-sm text-white/50">{lang === 'hu' ? 'Ft / ho-tol' : 'HUF / mo from'}</span>
+                  <span className="text-sm text-white/50">{lang === 'hu' ? 'Ft / hó-tól' : 'HUF / mo from'}</span>
                 </div>
                 <Link
                   to="/api"
                   className="inline-block bg-gold hover:bg-gold-light text-white font-semibold rounded-xl px-6 py-3 text-sm transition-colors no-underline shadow-lg shadow-gold/30"
                 >
-                  {lang === 'hu' ? 'Reszletek es arazas →' : 'Details & pricing →'}
+                  {lang === 'hu' ? 'Részletek és árazás →' : 'Details & pricing →'}
                 </Link>
               </div>
               <div className="hidden sm:block">
                 <div className="bg-gray-900/50 backdrop-blur-sm rounded-xl p-5 border border-white/10 font-mono text-xs text-gray-300 leading-6">
-                  <div className="text-white/40 mb-2">// {lang === 'hu' ? 'Pelda lekerdezes' : 'Example query'}</div>
+                  <div className="text-white/40 mb-2">// {lang === 'hu' ? 'Példa lekérdezés' : 'Example query'}</div>
                   <div><span className="text-teal-light">GET</span> /v1/companies?q=pelda</div>
-                  <div className="text-white/40 mt-3">// {lang === 'hu' ? 'Valasz' : 'Response'}</div>
+                  <div className="text-white/40 mt-3">// {lang === 'hu' ? 'Válasz' : 'Response'}</div>
                   <div>{'{'}</div>
                   <div>&nbsp;&nbsp;"nev": "Pelda Kft.",</div>
                   <div>&nbsp;&nbsp;"adoszam": "12345678-2-42",</div>
-                  <div>&nbsp;&nbsp;"statusz": "<span className="text-teal-light">Aktiv</span>"</div>
+                  <div>&nbsp;&nbsp;"statusz": "<span className="text-teal-light">Aktív</span>"</div>
                   <div>{'}'}</div>
                 </div>
               </div>

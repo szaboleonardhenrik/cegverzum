@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { PACKAGES, formatPrice } from '../config/pricing'
 import { SEO } from '../components/SEO'
@@ -60,6 +61,7 @@ const t = {
 
 export function PackagesPage() {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const currentPkg = user?.package || 'free'
   const lang = (localStorage.getItem('cegverzum_lang') as 'hu' | 'en') || 'hu'
   const s = t[lang]
@@ -147,12 +149,12 @@ export function PackagesPage() {
                     {s.activePkg}
                   </div>
                 ) : isHigher ? (
-                  <a
-                    href={`mailto:info@cegverzum.hu?subject=${encodeURIComponent(s.emailSubject)}`}
+                  <button
+                    onClick={() => navigate(`/?pkg=${encodeURIComponent(pkg.name)}#ajanlatkeres`)}
                     className="block w-full py-2.5 text-center text-sm font-medium text-white bg-gold hover:bg-gold-light rounded-lg transition-colors no-underline border-none cursor-pointer"
                   >
                     {s.interested}
-                  </a>
+                  </button>
                 ) : (
                   <div className="w-full py-2.5 text-center text-sm font-medium text-gray-400 bg-gray-50 dark:bg-gray-700 rounded-lg">
                     {s.lowerPkg}
@@ -166,9 +168,12 @@ export function PackagesPage() {
 
       <div className="text-center mt-10 text-sm text-gray-500">
         <p>{s.contactQuestion}</p>
-        <a href="mailto:info@cegverzum.hu" className="text-teal hover:text-teal-dark font-medium">
-          info@cegverzum.hu
-        </a>
+        <button
+          onClick={() => navigate('/?pkg=#ajanlatkeres')}
+          className="text-teal hover:text-teal-dark font-medium bg-transparent border-none cursor-pointer text-sm"
+        >
+          {lang === 'hu' ? 'Írjon nekünk →' : 'Contact us →'}
+        </button>
       </div>
     </div>
   )

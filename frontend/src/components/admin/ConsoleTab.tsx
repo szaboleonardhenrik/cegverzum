@@ -157,7 +157,7 @@ export function ConsoleTab() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="hour" tick={{ fontSize: 10 }} tickFormatter={(v: string) => v.slice(11, 16)} />
                 <YAxis allowDecimals={false} tick={{ fontSize: 10 }} />
-                <Tooltip labelFormatter={(v: string) => v} />
+                <Tooltip labelFormatter={(v) => String(v)} />
                 <Area type="monotone" dataKey="count" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.15} />
               </AreaChart>
             </ResponsiveContainer>
@@ -171,7 +171,7 @@ export function ConsoleTab() {
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                 <XAxis dataKey="hour" tick={{ fontSize: 10 }} tickFormatter={(v: string) => v.slice(11, 16)} />
                 <YAxis allowDecimals={false} tick={{ fontSize: 10 }} />
-                <Tooltip labelFormatter={(v: string) => v} />
+                <Tooltip labelFormatter={(v) => String(v)} />
                 <Line type="monotone" dataKey="error_count" stroke="#ef4444" strokeWidth={2} dot={false} />
               </LineChart>
             </ResponsiveContainer>

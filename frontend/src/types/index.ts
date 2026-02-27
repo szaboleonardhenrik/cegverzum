@@ -182,6 +182,44 @@ export interface AdminStats {
   total_chat_messages: number
   monthly_revenue: number
   recent_users: User[]
+  daily_active_users: number
+  signups_last_30_days: { date: string; count: number }[]
+  avg_response_time_ms: number
+  top_searched_companies: { path: string; count: number }[]
+}
+
+export interface RequestLog {
+  id: number
+  method: string
+  path: string
+  status_code: number
+  response_time_ms: number
+  user_id: number | null
+  ip: string | null
+  user_agent: string | null
+  created_at: string
+}
+
+export interface HourlyBucket {
+  hour: string
+  count: number
+  error_count: number
+  avg_response_time_ms: number
+}
+
+export interface TopEndpoint {
+  path: string
+  count: number
+  avg_response_time_ms: number
+}
+
+export interface LogAggregateStats {
+  total_requests: number
+  requests_last_hour: number
+  error_rate: number
+  avg_response_time_ms: number
+  top_endpoints: TopEndpoint[]
+  hourly_breakdown: HourlyBucket[]
 }
 
 export interface NetworkNode {

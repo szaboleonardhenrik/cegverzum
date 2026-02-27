@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts'
 import { adminApi } from '../api/admin'
 import { SEO } from '../components/SEO'
-import type { User, Module, UserModule, AdminStats } from '../types'
+import { ConsoleTab } from '../components/admin/ConsoleTab'
+import { EnhancedStatsTab } from '../components/admin/EnhancedStatsTab'
+import type { User, Module, UserModule } from '../types'
 import { PACKAGES, formatPrice, packageLabel } from '../config/pricing'
 
-type Tab = 'felhasznalok' | 'modulok' | 'statisztikak'
+type Tab = 'felhasznalok' | 'modulok' | 'statisztikak' | 'konzol'
 
 function packageColor(pkg: string): string {
   switch (pkg) {
@@ -27,6 +28,7 @@ const t = {
     tabUsers: 'Felhasználók',
     tabModules: 'Modulok',
     tabStats: 'Statisztikák',
+    tabConsole: 'Konzol',
     searchPlaceholder: 'Keresés név vagy email alapján...',
     allRoles: 'Minden szerepkör',
     admin: 'Admin',
@@ -119,6 +121,7 @@ const t = {
     tabUsers: 'Users',
     tabModules: 'Modules',
     tabStats: 'Statistics',
+    tabConsole: 'Console',
     searchPlaceholder: 'Search by name or email...',
     allRoles: 'All roles',
     admin: 'Admin',
@@ -244,9 +247,7 @@ export function AdminPage() {
   const [userModules, setUserModules] = useState<Record<number, UserModule[]>>({})
   const [modulesLoading, setModulesLoading] = useState(false)
 
-  // Admin stats
-  const [adminStats, setAdminStats] = useState<AdminStats | null>(null)
-  const [statsLoading, setStatsLoading] = useState(false)
+  // Admin stats (handled by EnhancedStatsTab now)
 
   // Search/filter
   const [search, setSearch] = useState('')
@@ -290,21 +291,8 @@ export function AdminPage() {
     }
   }
 
-  const loadStats = async () => {
-    setStatsLoading(true)
-    try {
-      const data = await adminApi.getStats()
-      setAdminStats(data)
-    } catch {
-      setError(s.errorLoadStats)
-    } finally {
-      setStatsLoading(false)
-    }
-  }
-
   useEffect(() => { loadUsers() }, [])
   useEffect(() => { if (tab === 'modulok') loadModules() }, [tab])
-  useEffect(() => { if (tab === 'statisztikak') loadStats() }, [tab])
 
   const handleCreateUser = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -545,6 +533,14 @@ export function AdminPage() {
           }`}
         >
           {s.tabStats}
+        </button>
+        <button
+          onClick={() => setTab('konzol')}
+          className={`px-4 py-2 rounded-lg text-sm font-medium border-none cursor-pointer transition-colors ${
+            tab === 'konzol' ? 'bg-white dark:bg-gray-700 text-navy dark:text-white shadow-sm' : 'bg-transparent text-gray-500 hover:text-gray-700'
+          }`}
+        >
+          {s.tabConsole}
         </button>
       </div>
 
@@ -803,105 +799,10 @@ export function AdminPage() {
       )}
 
       {/* STATISZTIKAK TAB */}
-      {tab === 'statisztikak' && (
-        <>
-          {statsLoading ? (
-            <div className="flex justify-center py-12">
-              <div className="animate-spin h-10 w-10 border-4 border-gold border-t-transparent rounded-full" />
-            </div>
-          ) : adminStats ? (
-            <>
-              {/* Stat cards */}
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider">{s.totalUsers}</p>
-                  <p className="text-2xl font-bold text-navy dark:text-white mt-1">{adminStats.total_users}</p>
-                </div>
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider">{s.activePartners}</p>
-                  <p className="text-2xl font-bold text-green-600 mt-1">{adminStats.active_users}</p>
-                </div>
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider">{s.monthlyRevenue}</p>
-                  <p className="text-2xl font-bold text-gold mt-1">{adminStats.monthly_revenue.toLocaleString('hu-HU')} Ft</p>
-                </div>
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider">{s.chatMessages}</p>
-                  <p className="text-2xl font-bold text-teal mt-1">{adminStats.total_chat_messages.toLocaleString('hu-HU')}</p>
-                </div>
-              </div>
+      {tab === 'statisztikak' && <EnhancedStatsTab />}
 
-              {/* Additional info row */}
-              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider">{s.companiesInDb}</p>
-                  <p className="text-2xl font-bold text-navy dark:text-white mt-1">{adminStats.total_companies.toLocaleString('hu-HU')}</p>
-                </div>
-                <div className="bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-100 dark:border-gray-700 shadow-sm">
-                  <p className="text-xs text-gray-500 uppercase tracking-wider">{s.admins}</p>
-                  <p className="text-2xl font-bold text-purple-600 mt-1">{adminStats.admin_count}</p>
-                </div>
-              </div>
-
-              {/* Package chart */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl p-5 border border-gray-100 dark:border-gray-700 shadow-sm mb-6">
-                <h3 className="text-base font-semibold text-navy dark:text-white mb-4">{s.usersByPackage}</h3>
-                <ResponsiveContainer width="100%" height={280}>
-                  <BarChart data={[
-                    { name: 'Free', count: adminStats.users_by_package.free || 0 },
-                    { name: 'Basic', count: adminStats.users_by_package.basic || 0 },
-                    { name: 'Pro', count: adminStats.users_by_package.pro || 0 },
-                    { name: 'Enterprise', count: adminStats.users_by_package.enterprise || 0 },
-                  ]}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                    <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-                    <YAxis allowDecimals={false} tick={{ fontSize: 12 }} />
-                    <Tooltip />
-                    <Bar dataKey="count" name={s.usersChartLabel} fill="#D4A017" radius={[6, 6, 0, 0]} />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-
-              {/* Recent registrations */}
-              <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-100 dark:border-gray-700 shadow-sm overflow-hidden">
-                <div className="px-5 py-3 border-b border-gray-200 dark:border-gray-600">
-                  <h3 className="text-base font-semibold text-navy dark:text-white">{s.recentRegistrations}</h3>
-                </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead className="bg-gray-50 dark:bg-gray-700">
-                      <tr>
-                        <th className="text-left px-4 py-3 font-medium text-gray-600 dark:text-gray-300">{s.thName}</th>
-                        <th className="text-left px-4 py-3 font-medium text-gray-600 dark:text-gray-300">{s.thEmail}</th>
-                        <th className="text-center px-4 py-3 font-medium text-gray-600 dark:text-gray-300">{s.thPackage}</th>
-                        <th className="text-right px-4 py-3 font-medium text-gray-600 dark:text-gray-300">{s.thDate}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {adminStats.recent_users.map(u => (
-                        <tr key={u.id} className="border-b border-gray-100 dark:border-gray-700 last:border-b-0">
-                          <td className="px-4 py-3 font-medium text-gray-900 dark:text-white">{u.full_name || '–'}</td>
-                          <td className="px-4 py-3 text-gray-600 dark:text-gray-300">{u.email}</td>
-                          <td className="px-4 py-3 text-center">
-                            <span className={`inline-block px-2.5 py-0.5 rounded-full text-xs font-medium ${packageColor(u.package)}`}>
-                              {packageLabel(u.package)}
-                            </span>
-                          </td>
-                          <td className="px-4 py-3 text-right text-gray-500 text-xs">
-                            {u.created_at ? new Date(u.created_at).toLocaleDateString('hu-HU') : '–'}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </>
-          ) : (
-            <div className="text-center text-gray-400 py-12">{s.statsLoadFailed}</div>
-          )}
-        </>
-      )}
+      {/* KONZOL TAB */}
+      {tab === 'konzol' && <ConsoleTab />}
 
       {/* CREATE USER MODAL */}
       {showCreate && (

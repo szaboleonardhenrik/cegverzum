@@ -1,5 +1,5 @@
 import { api } from './client'
-import type { User, Module, UserModule, AdminStats } from '../types'
+import type { User, Module, UserModule, AdminStats, RequestLog, LogAggregateStats } from '../types'
 
 export const adminApi = {
   // Users (all)
@@ -36,4 +36,17 @@ export const adminApi = {
   listUserModules: (userId: number) => api.get<UserModule[]>(`/admin/users/${userId}/modules`),
   toggleUserModule: (userId: number, moduleId: number) =>
     api.patch<UserModule>(`/admin/users/${userId}/modules/${moduleId}`),
+
+  // Logs
+  getLogs: (params?: { skip?: number; limit?: number; method?: string; path?: string; status_code?: number; user_id?: number }) => {
+    const qs = new URLSearchParams()
+    if (params) {
+      Object.entries(params).forEach(([k, v]) => {
+        if (v !== undefined && v !== null && v !== '') qs.set(k, String(v))
+      })
+    }
+    const q = qs.toString()
+    return api.get<RequestLog[]>(`/admin/logs${q ? '?' + q : ''}`)
+  },
+  getLogStats: () => api.get<LogAggregateStats>('/admin/logs/stats'),
 }
